@@ -1,0 +1,52 @@
+<?
+/**
+ * TRIBUNAL REGIONAL FEDERAL DA 4ª REGIÃO
+ *
+ * 20/12/2007 - criado por mga
+ *
+ * Versão do Gerador de Código: 1.12.0
+ *
+ * Versão no CVS: $Id$
+ */
+
+require_once dirname(__FILE__).'/../../../../SEI.php';
+
+class MdCguEouvAgendamentoINT extends InfraINT {
+
+
+  public static function retornarUltimaExecucaoSucesso(){
+
+    $objEouvRelatorioImportacaoDTO=new MdCguEouvRelatorioImportacaoDTO();
+    $objEouvRelatorioImportacaoDTO->retDthDthImportacao();
+    $objEouvRelatorioImportacaoDTO->retNumIdRelatorioImportacao();
+    $objEouvRelatorioImportacaoDTO->setStrSinSucesso('S');
+    $objEouvRelatorioImportacaoDTO->setOrdDthDthImportacao(InfraDTO::$TIPO_ORDENACAO_DESC);
+    $objEouvRelatorioImportacaoDTO->setNumMaxRegistrosRetorno(1);
+
+    $objEouvRelatorioImportacaoRN = new MdCguEouvRelatorioImportacaoRN();
+
+      try{
+          $resultadoObjEouvRelatorioImportacaoDTO = $objEouvRelatorioImportacaoRN->consultar($objEouvRelatorioImportacaoDTO);
+      }catch(Exception $e){
+          throw new InfraException('Erro obtendo última execução da Importacao SEI x EOuv ocorrida com Sucesso.',$e);
+      }
+
+      LogSEI::getInstance()->gravar('Última Execução com Sucesso:' . $resultadoObjEouvRelatorioImportacaoDTO);
+    return $resultadoObjEouvRelatorioImportacaoDTO;
+  }
+
+   public static function retornarManifestacoesNaoImportadasPorProblema($idUltimaExecucao){
+
+       $objEouvRelatorioImportacaoDetalheDTO=new MdCguEouvRelatorioImportacaoDetalheDTO();
+       $objEouvRelatorioImportacaoDetalheDTO->retStrProtocoloFormatado();
+       $objEouvRelatorioImportacaoDetalheDTO->setStrSinSucesso('N');
+       $objEouvRelatorioImportacaoDetalheDTO->setNumIdRelatorioImportacao($idUltimaExecucao);
+
+       $objEouvRelatorioImportacaoDetalheRN = new EouvRelatorioImportacaoDetalheRN();
+
+       $arrObjEouvRelatorioImportacaoDetalheDTO = $objEouvRelatorioImportacaoDetalheRN->listar($objEouvRelatorioImportacaoDetalheDTO);
+
+       return $arrObjEouvRelatorioImportacaoDetalheDTO;
+   }
+}
+?>
