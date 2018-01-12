@@ -14,14 +14,14 @@ require_once dirname(__FILE__) . '/../../../../SEI.php';
 class MdCguEouvRelatorioImportacaoDTO extends InfraDTO {
 
   public function getStrNomeTabela() {
-  	 return 'md_cgu_eouv_relatorio_importacao';
+  	 return 'md_eouv_rel_import';
   }
 
   public function montar() {
 
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM,
                                    'IdRelatorioImportacao',
-                                   'id_md_cgu_eouv_relatorio_importacao');
+                                   'id_md_eouv_rel_import');
 
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DTH,
                                    'DthImportacao',

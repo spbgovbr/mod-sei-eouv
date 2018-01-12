@@ -14,7 +14,7 @@ require_once dirname(__FILE__) . '/../../../../SEI.php';
 class MdCguEouvDeparaImportacaoDTO extends InfraDTO {
 
   public function getStrNomeTabela() {
-  	 return 'md_cgu_eouv_depara_importacao';
+  	 return 'md_eouv_depara_importacao';
   }
 
   public function montar() {

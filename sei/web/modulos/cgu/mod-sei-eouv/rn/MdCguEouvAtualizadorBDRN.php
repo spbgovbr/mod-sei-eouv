@@ -148,50 +148,51 @@ class MdCguEouvAtualizadorBDRN extends InfraRN
         $this->logar('EXECUTANDO A INSTALACAO DA VERSAO 1.0.0 DO MODULO ' . $this->nomeDesteModulo . ' NA BASE DO SEI');
 
         //6.1	Para o mapeamento DE-PARA entre os Tipos de Manifestação E-ouv e Tipo de processo SEI
-        $this->logar('CRIANDO A TABELA md_cgu_eouv_depara_importacao');
+        $this->logar('CRIANDO A TABELA md_eouv_depara_importacao');
 
-        BancoSEI::getInstance()->executarSql('CREATE TABLE md_cgu_eouv_depara_importacao(id_tipo_manifestacao_eouv ' . $objInfraMetaBD->tipoNumero() . ' NOT NULL ,
+        BancoSEI::getInstance()->executarSql('CREATE TABLE md_eouv_depara_importacao(id_tipo_manifestacao_eouv ' . $objInfraMetaBD->tipoNumero() . ' NOT NULL ,
             id_tipo_procedimento ' . $objInfraMetaBD->tipoNumero() . ' NOT NULL ,
 		    de_tipo_manifestacao_eouv ' . $objInfraMetaBD->tipoTextoVariavel(50) . ' NULL)');
 
-        $objInfraMetaBD->adicionarChavePrimaria('md_cgu_eouv_depara_importacao', 'pk_md_cgu_eouv_depara_importacao', array('id_tipo_manifestacao_eouv', 'id_tipo_procedimento'));
-        $objInfraMetaBD->adicionarChaveEstrangeira('fk1_md_cgu_eouv_tipo_procedimento', 'md_cgu_eouv_depara_importacao', array('id_tipo_procedimento'), 'tipo_procedimento', array('id_tipo_procedimento'));
-        $objInfraMetaBD->criarIndice('md_cgu_eouv_depara_importacao', 'i01_md_cgu_eouv_depara_importacao', array(id_tipo_procedimento));
+        $objInfraMetaBD->adicionarChavePrimaria('md_eouv_depara_importacao', 'pk_md_eouv_depara_importacao', array('id_tipo_manifestacao_eouv', 'id_tipo_procedimento'));
+        $objInfraMetaBD->adicionarChaveEstrangeira('fk1_md_eouv_tipo_procedimento', 'md_eouv_depara_importacao', array('id_tipo_procedimento'), 'tipo_procedimento', array('id_tipo_procedimento'));
+        $objInfraMetaBD->criarIndice('md_eouv_depara_importacao', 'i01_md_eouv_depara_importacao', array(id_tipo_procedimento));
 
-        $this->logar('CRIANDO REGISTROS PARA A TABELA md_cgu_eouv_depara_importacao');
-        BancoSEI::getInstance()->executarSql('INSERT INTO md_cgu_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'1\', \'Denúncia\', \'100000335\');');
-        BancoSEI::getInstance()->executarSql('INSERT INTO md_cgu_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'2\', \'Reclamação\', \'100000336\');');
-        BancoSEI::getInstance()->executarSql('INSERT INTO md_cgu_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'3\', \'Elogio\', \'100000333\');');
-        BancoSEI::getInstance()->executarSql('INSERT INTO md_cgu_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'4\', \'Sugestão\', \'100000338\');');
-        BancoSEI::getInstance()->executarSql('INSERT INTO md_cgu_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'5\', \'Solicitação\', \'100000334\');');
+        $this->logar('CRIANDO REGISTROS PARA A TABELA md_eouv_depara_importacao');
+        BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'1\', \'Denúncia\', \'100000335\');');
+        BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'2\', \'Reclamação\', \'100000336\');');
+        BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'3\', \'Elogio\', \'100000333\');');
+        BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'4\', \'Sugestão\', \'100000338\');');
+        BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'5\', \'Solicitação\', \'100000334\');');
 
-        $this->logar('CRIANDO A TABELA md_cgu_eouv_relatorio_importacao');
-        BancoSEI::getInstance()->executarSql('CREATE TABLE md_cgu_eouv_relatorio_importacao(id_md_cgu_eouv_relatorio_importacao ' . $objInfraMetaBD->tipoNumero() . ' NOT NULL ,
+        $this->logar('CRIANDO A TABELA md_eouv_rel_import');
+        BancoSEI::getInstance()->executarSql('CREATE TABLE md_eouv_rel_import(id_md_eouv_rel_import ' . $objInfraMetaBD->tipoNumero() . ' NOT NULL ,
         dth_importacao ' . $objInfraMetaBD->tipoDataHora() . ' NOT NULL ,
         sin_sucesso ' . $objInfraMetaBD->tipoTextoFixo(1) . ' NOT NULL ,
         dth_periodo_inicial ' . $objInfraMetaBD->tipoDataHora() . ' NULL ,
         dth_periodo_final ' . $objInfraMetaBD->tipoDataHora() . ' NULL ,
         des_log_processamento ' . $objInfraMetaBD->tipoTextoVariavel(500) . ' NULL)');
-        $objInfraMetaBD->adicionarChavePrimaria('md_cgu_eouv_relatorio_importacao', 'pk_md_cgu_eouv_relatorio_importacao', array('id_md_cgu_eouv_relatorio_importacao'));
+        $objInfraMetaBD->adicionarChavePrimaria('md_eouv_rel_import', 'pk_md_eouv_rel_import', array('id_md_eouv_rel_import'));
 
-        $this->logar('CRIANDO A TABELA md_cgu_eouv_relatorio_import_detalhe');
-        BancoSEI::getInstance()->executarSql('CREATE TABLE md_cgu_eouv_relatorio_import_detalhe(id_md_cgu_eouv_relatorio_importacao ' . $objInfraMetaBD->tipoNumero() . ' NOT NULL ,
+        $this->logar('CRIANDO A TABELA md_eouv_rel_import_det');
+        BancoSEI::getInstance()->executarSql('CREATE TABLE md_eouv_rel_import_det(id_md_eouv_rel_import ' . $objInfraMetaBD->tipoNumero() . ' NOT NULL ,
         num_protocolo_formatado ' . $objInfraMetaBD->tipoTextoFixo(50) . ' NOT NULL ,
         sin_sucesso ' . $objInfraMetaBD->tipoTextoFixo(1) . ' NOT NULL ,
         des_log_processamento ' . $objInfraMetaBD->tipoTextoVariavel(500) . ' NULL,
         dth_importacao ' . $objInfraMetaBD->tipoDataHora() . ' NULL)');
 
-        $objInfraMetaBD->adicionarChavePrimaria('md_cgu_eouv_relatorio_import_detalhe', 'pk_md_cgu_eouv_relatorio_import_detalhe',
-        array('id_md_cgu_eouv_relatorio_importacao', 'num_protocolo_formatado'));
-        $objInfraMetaBD->adicionarChaveEstrangeira('fk1_md_cgu_eouv_relatorio_import_detalhe', 'md_cgu_eouv_relatorio_import_detalhe', array('id_md_cgu_eouv_relatorio_importacao'), 'md_cgu_eouv_relatorio_importacao', array('id_md_cgu_eouv_relatorio_importacao'));
+        $objInfraMetaBD->adicionarChavePrimaria('md_eouv_rel_import_det', 'pk_md_eouv_rel_import_det',
+        array('id_md_eouv_rel_import', 'num_protocolo_formatado'));
+        $objInfraMetaBD->adicionarChaveEstrangeira('fk1_md_eouv_rel_import_det', 'md_eouv_rel_import_det', array('id_md_eouv_rel_import'), 'md_eouv_rel_import', array('id_md_eouv_rel_import'));
 
         if (BancoSEI::getInstance() instanceof InfraMySql) {
-        BancoSEI::getInstance()->executarSql('create table seq_md_cgu_eouv_relatorio_importacao (id bigint not null primary key AUTO_INCREMENT, campo char(1) null) AUTO_INCREMENT = 1');
+        BancoSEI::getInstance()->executarSql('create table seq_md_eouv_rel_import (id bigint not null primary key AUTO_INCREMENT, campo char(1) null) AUTO_INCREMENT = 1');
         } else if (BancoSEI::getInstance() instanceof InfraSqlServer) {
-        BancoSEI::getInstance()->executarSql('create table seq_md_cgu_eouv_relatorio_importacao (id bigint identity(1,1), campo char(1) null)');
+        BancoSEI::getInstance()->executarSql('create table seq_md_eouv_rel_import (id bigint identity(1,1), campo char(1) null)');
         } else if (BancoSEI::getInstance() instanceof InfraOracle) {
-        BancoSEI::getInstance()->criarSequencialNativa('seq_md_cgu_eouv_relatorio_importacao', 1);
+        BancoSEI::getInstance()->criarSequencialNativa('seq_md_eouv_rel_import', 1);
         }
+
 
         $this->logar('CRIANDO Parâmetros do Sei');
         $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
@@ -265,5 +266,6 @@ class MdCguEouvAtualizadorBDRN extends InfraRN
         $objOperacaoServicoDTO->setNumIdTipoProcedimento(null);
         $objOperacaoServicoRN = new OperacaoServicoRN();
         $objOperacaoServicoDTO = $objOperacaoServicoRN->cadastrar($objOperacaoServicoDTO);
+ 
     }
 }
