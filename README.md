@@ -65,7 +65,7 @@ https://youtu.be/flObz3gDIrI
 
 - EOUV_USUARIO_ACESSO_WEBSERVICE: Nome de usuário para acesso aos WebServices do e-Ouv.
 Este nome de usuário é gerado para cada órgão especificamente para consumir os Webservices do e-Ouv.
-Caso ainda não possua esse usuário e a senha abaixo entrar em contato através do e-mail abaixo solicitando o mesmo: marcos.silva@cgu.gov.br
+Caso ainda não possua esse usuário e a senha abaixo entrar em contato através do e-mail abaixo solicitando o mesmo: cgouv@cgu.gov.br
 
 - EOUV_SENHA_ACESSO_WEBSERVICE: Senha do usuário para acesso aos WebServices do e-Ouv.
 
