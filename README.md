@@ -75,6 +75,8 @@ Obs: Para efeitos de testes e homologação utilizar o ambiente de treinamento: 
 - EOUV_URL_WEBSERVICE_IMPORTACAO_ANEXO_MANIFESTACAO: Já vem configurado para o ambiente de produção do e-Ouv com https://sistema.ouvidorias.gov.br/Servicos/ServicoAnexosManifestacao.svc
 Obs: Para efeitos de testes e homologação utilizar o ambiente de treinamento: http://treinamentoouvidorias.cgu.gov.br
 
+- ID_UNIDADE_OUVIDORIA: Código da Unidade que deverá registrar os novos processos. Ao importar os processos do e-Ouv para o SEI essa será a unidade que receberá os Processos no SEI.
+
 2. Foi criado um novo Agendamento de Tarefa com o nome "MdCguEouvAgendamentoRN :: executarImportacaoManifestacaoEOuv". O mesmo é configurado por padrão para ser executado apenas uma vez por dia e deverá ser configurado conforme desejado pelo órgão. Os agendamentos podem ser acessados em Infra > Agendamentos.
 
 3. Foi criado um menu com o nome E-Ouv que possui um relatório das execuções de Importação executadas. A cada execução do agendamento é gerado um registro que contém os detalhes da execução informando se houve sucesso e os Protocolos que foram importados.
