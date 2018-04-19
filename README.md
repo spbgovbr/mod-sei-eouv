@@ -1,4 +1,3 @@
-
 # Módulo de Integração SEI x e-Ouv
 
 ## Requisitos:
@@ -48,14 +47,9 @@
 		- Constando o termo "FIM" e informação de que a instalação ocorreu com sucesso, pode logar no SEI e SIP e verificar no menu Infra > Módulos se consta o módulo "Módulo de Integração entre o sistema SEI e o E-ouv(Sistema de Ouvidorias)" com o valor da última versão do módulo.
 
 8. Em caso de erro durante a execução do script verificar (lendo as mensagens de erro e no menu Infra > Log do SEI e do SIP) se a causa é algum problema na infra-estrutura local. Neste caso, após a correção, deve recuperar o backup do banco pertinente e repetir o procedimento, especialmente a execução dos scripts indicados nos itens 4 e 5 acima.
-
 	- Caso não seja possível identificar a causa, entrar em contato com: Rafael Leandro - rafael.ferreira@cgu.gov.br
 
 ## Orientações Negociais:
-
-Para entender melhor o funcionamento do módulo criamos o vídeo abaixo com uma demonstração das funcionalidades do mesmo:
-
-https://youtu.be/flObz3gDIrI
 
 1. Imediatamente após a instalação com sucesso, com usuário com permissão de "Administrador" do SEI, é necessário realizar as parametrizações do módulo no menu Infra > Parâmetros alterando os seguintes Parâmetros:
 
@@ -65,7 +59,7 @@ https://youtu.be/flObz3gDIrI
 
 - EOUV_USUARIO_ACESSO_WEBSERVICE: Nome de usuário para acesso aos WebServices do e-Ouv.
 Este nome de usuário é gerado para cada órgão especificamente para consumir os Webservices do e-Ouv.
-Caso ainda não possua esse usuário e a senha abaixo entrar em contato através do e-mail abaixo solicitando o mesmo: cgouv@cgu.gov.br
+Caso ainda não possua esse usuário e a senha abaixo entrar em contato através do e-mail abaixo solicitando o mesmo: marcos.silva@cgu.gov.br
 
 - EOUV_SENHA_ACESSO_WEBSERVICE: Senha do usuário para acesso aos WebServices do e-Ouv.
 
@@ -81,7 +75,7 @@ Obs: Para efeitos de testes e homologação utilizar o ambiente de treinamento: 
 
 3. Foi criado um menu com o nome E-Ouv que possui um relatório das execuções de Importação executadas. A cada execução do agendamento é gerado um registro que contém os detalhes da execução informando se houve sucesso e os Protocolos que foram importados.
 
-4. Foi criada uma tabela com o nome md_eouv_depara_importacao que serve para dizer para a rotina qual o Tipo de Processo será cadastrado para cada tipo de Manifestação do e-Ouv. Seguindo a tabela abaixo informe qual o código do tipo de processo(Administração > Tipos de Processo) para cada equivalente. 
+4. Foi criada uma tabela com o nome md_cgu_eouv_depara_importacao que serve para dizer para a rotina qual o Tipo de Processo será cadastrado para cada tipo de Manifestação do e-Ouv. Seguindo a tabela abaixo informe qual o código do tipo de processo(Administração > Tipos de Processo) para cada equivalente. 
 
 |id_tipo_manifestacao_eouv |id_tipo_procecimento    |de_tipo_manifestacao_eouv |
 |--------------------------|------------------------|--------------------------|

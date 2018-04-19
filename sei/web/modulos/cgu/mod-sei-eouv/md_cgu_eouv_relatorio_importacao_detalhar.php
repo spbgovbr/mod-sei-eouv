@@ -72,31 +72,13 @@
       $bolAcaoConsultar = false;//SessaoSEI::getInstance()->verificarPermissao('infra_agendamento_tarefa_consultar');
       //$bolCheck = true;
       $bolAcaoExecutar = false;
-    /*  
-    }else if ($_GET['acao']=='infra_agendamento_tarefa_reativar'){
-      $bolAcaoReativar = SessaoSEI::getInstance()->verificarPermissao('infra_agendamento_tarefa_reativar');
-      $bolAcaoConsultar = SessaoSEI::getInstance()->verificarPermissao('infra_agendamento_tarefa_consultar');
-      $bolAcaoAlterar = false;
-      $bolAcaoImprimir = true;
-      //$bolAcaoGerarPlanilha = SessaoSEI::getInstance()->verificarPermissao('infra_gerar_planilha_tabela');
-      $bolAcaoExcluir = SessaoSEI::getInstance()->verificarPermissao('infra_agendamento_tarefa_excluir');
-      $bolAcaoDesativar = false;
-      $bolAcaoExecutar = SessaoSEI::getInstance()->verificarPermissao('infra_agendamento_tarefa_executar');
-    */  
+
     }else{
       $bolAcaoConsultar = SessaoSEI::getInstance()->verificarPermissao('md_cgu_eouv_relatorio_importacao_detalhe');
 
     }
 
     $strResultado = '';
-
-    if ($_GET['acao']!='infra_agendamento_tarefa_reativar'){
-      $strSumarioTabela = 'Tabela de Execuçoes.';
-      $strCaptionTabela = 'Agendamentos';
-    }else{
-      $strSumarioTabela = 'Tabela de Agendamentos Inativos.';
-      $strCaptionTabela = 'Agendamentos Inativos';
-    }
 
     $strResultado .= '<table width="99%" class="infraTable" summary="'.$strSumarioTabela.'">'."\n";
     $strResultado .= '<caption class="infraCaption">'.PaginaSEI::getInstance()->gerarCaptionTabela($strCaptionTabela,$numRegistros).'</caption>';

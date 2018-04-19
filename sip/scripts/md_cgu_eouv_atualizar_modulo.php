@@ -186,7 +186,7 @@ class MdCguEouvAtualizadorSipRN extends InfraRN{
         $numIdMenuSei = $objMenuDTO->getNumIdMenu();
 
         $menuEouv = $this->adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador,
-            $numIdMenuSei, null, $numIdRecursoIntegracaoSei, 'E-Ouv',
+            $numIdMenuSei, null, null, 'E-Ouv',
             'Integração entre E-ouv e SEI', 1100);
 
         $this->adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador,
