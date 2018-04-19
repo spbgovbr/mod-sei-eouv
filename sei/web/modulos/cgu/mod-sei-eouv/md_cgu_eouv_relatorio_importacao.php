@@ -25,116 +25,6 @@
   SessaoSEI::getInstance()->validarPermissao($_GET['acao']);
 
   switch($_GET['acao']){
-  	case 'infra_agendamento_tarefa_executar':
-  		try{
-	  		$objEouvRelatorioImportacaoDTO = new InfraAgendamentoTarefaDTO();
-	  		$objEouvRelatorioImportacaoDTO->setBolExclusaoLogica(false);
-	  		$objEouvRelatorioImportacaoDTO->setNumIdInfraAgendamentoTarefa($_GET['id_infra_agendamento_tarefa']);
-	  		
-	  		$objEouvRelatorioImportacaoDTO->retNumIdInfraAgendamentoTarefa();
-	  		$objEouvRelatorioImportacaoDTO->retStrComando();
-	  		$objEouvRelatorioImportacaoDTO->retStrParametro();
-	  		
-	  		$objEouvRelatorioImportacaoRN = new InfraAgendamentoTarefaRN();
-	  		$objEouvRelatorioImportacaoDTO = $objEouvRelatorioImportacaoRN->consultar($objEouvRelatorioImportacaoDTO);
-	  		
-	  		// não é necessário gravar o log acesso manualmente aqui pois ele será gravado pelo próprio controlador qdo a tarefa é executada via centralrh
-	  		
-	  		// obtém lista de parâmetros
-	  		$strParametros = explode(',', $objEouvRelatorioImportacaoDTO->getStrParametro());
-	  		$arrParametros = array();
-	  		foreach($strParametros as $strParametro){
-	  			list($chave, $valor) = explode('=',$strParametro);
-	  			$arrParametros[$chave][] = $valor;
-	  		}
-	  		
-	  		// grava data de execução
-	  		$objInfraAgendamentoTarefaDTO2 = new InfraAgendamentoTarefaDTO();
-	  		$objInfraAgendamentoTarefaDTO2->setNumIdInfraAgendamentoTarefa($objEouvRelatorioImportacaoDTO->getNumIdInfraAgendamentoTarefa());
-	  		$objInfraAgendamentoTarefaDTO2->setDthUltimaExecucao(InfraData::getStrDataHoraAtual());
-	  		$objInfraAgendamentoTarefaDTO2->setStrSinSucesso('N');
-	  		$objEouvRelatorioImportacaoRN->alterar($objInfraAgendamentoTarefaDTO2);
-	  		
-	  		// executa tarefa
-	  		list($strClasse, $strMetodo) = explode('::',$objEouvRelatorioImportacaoDTO->getStrComando());
-	  		eval('$objRN = new '.$strClasse.'();');
-	  		eval('$objRN->'.$strMetodo.'($arrParametros);');
-	  		
-	  		// grava data de conclusão e seta flag de sucesso
-	  		$objInfraAgendamentoTarefaDTO2 = new InfraAgendamentoTarefaDTO();
-	  		$objInfraAgendamentoTarefaDTO2->setNumIdInfraAgendamentoTarefa($objEouvRelatorioImportacaoDTO->getNumIdInfraAgendamentoTarefa());
-	  		$objInfraAgendamentoTarefaDTO2->setDthUltimaConclusao(InfraData::getStrDataHoraAtual());
-	  		$objInfraAgendamentoTarefaDTO2->setStrSinSucesso('S');
-	  		$objEouvRelatorioImportacaoRN->alterar($objInfraAgendamentoTarefaDTO2);
-	  		PaginaSEI::getInstance()->setStrMensagem('Execução concluída com sucesso.');
-	  		
-      }catch(Exception $e){
-        PaginaSEI::getInstance()->processarExcecao($e);
-      } 
-      header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_origem'].'&acao_origem='.$_GET['acao'].PaginaSEI::getInstance()->montarAncora($objEouvRelatorioImportacaoDTO->getNumIdInfraAgendamentoTarefa())));
-      die;
-  		break;
-  		
-    case 'infra_agendamento_tarefa_excluir':
-      try{
-        $arrStrIds = PaginaSEI::getInstance()->getArrStrItensSelecionados();
-        $arrObjEouvRelatorioImportacaoDTO = array();
-        for ($i=0;$i<count($arrStrIds);$i++){
-          $objEouvRelatorioImportacaoDTO = new InfraAgendamentoTarefaDTO();
-          $objEouvRelatorioImportacaoDTO->setNumIdInfraAgendamentoTarefa($arrStrIds[$i]);
-          $arrObjEouvRelatorioImportacaoDTO[] = $objEouvRelatorioImportacaoDTO;
-        }
-        $objEouvRelatorioImportacaoRN = new InfraAgendamentoTarefaRN();
-        $objEouvRelatorioImportacaoRN->excluir($arrObjEouvRelatorioImportacaoDTO);
-        PaginaSEI::getInstance()->adicionarMensagem('Operação realizada com sucesso.');
-      }catch(Exception $e){
-        PaginaSEI::getInstance()->processarExcecao($e);
-      } 
-      header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_origem'].'&acao_origem='.$_GET['acao']));
-      die;
-
-
-    case 'infra_agendamento_tarefa_desativar':
-      try{
-        $arrStrIds = PaginaSEI::getInstance()->getArrStrItensSelecionados();
-        $arrObjEouvRelatorioImportacaoDTO = array();
-        for ($i=0;$i<count($arrStrIds);$i++){
-          $objEouvRelatorioImportacaoDTO = new InfraAgendamentoTarefaDTO();
-          $objEouvRelatorioImportacaoDTO->setNumIdInfraAgendamentoTarefa($arrStrIds[$i]);
-          $arrObjEouvRelatorioImportacaoDTO[] = $objEouvRelatorioImportacaoDTO;
-        }
-        $objEouvRelatorioImportacaoRN = new InfraAgendamentoTarefaRN();
-        $objEouvRelatorioImportacaoRN->desativar($arrObjEouvRelatorioImportacaoDTO);
-        PaginaSEI::getInstance()->adicionarMensagem('Operação realizada com sucesso.');
-      }catch(Exception $e){
-        PaginaSEI::getInstance()->processarExcecao($e);
-      } 
-      header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_origem'].'&acao_origem='.$_GET['acao']));
-      die;
-
-    case 'infra_agendamento_tarefa_reativar':
-      $strTitulo = 'Reativar Agendamentos de Tarefas';
-      
-      if ($_GET['acao_confirmada']=='sim'){
-        try{
-          $arrStrIds = PaginaSEI::getInstance()->getArrStrItensSelecionados();
-          $arrObjEouvRelatorioImportacaoDTO = array();
-          for ($i=0;$i<count($arrStrIds);$i++){
-            $objEouvRelatorioImportacaoDTO = new InfraAgendamentoTarefaDTO();
-            $objEouvRelatorioImportacaoDTO->setNumIdInfraAgendamentoTarefa($arrStrIds[$i]);
-            $arrObjEouvRelatorioImportacaoDTO[] = $objEouvRelatorioImportacaoDTO;
-          }
-          $objEouvRelatorioImportacaoRN = new InfraAgendamentoTarefaRN();
-          $objEouvRelatorioImportacaoRN->reativar($arrObjEouvRelatorioImportacaoDTO);
-          PaginaSEI::getInstance()->adicionarMensagem('Operação realizada com sucesso.');
-        }catch(Exception $e){
-          PaginaSEI::getInstance()->processarExcecao($e);
-        } 
-        header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_origem'].'&acao_origem='.$_GET['acao']));
-        die;
-      } 
-      break;
-
 
     case 'md_cgu_eouv_relatorio_importacao_listar':
       $strTitulo = 'Lista de Importações Realizadas';
@@ -143,8 +33,6 @@
     default:
       throw new InfraException("Ação '".$_GET['acao']."' não reconhecida.");
   }
-
-
 
   $arrComandos = array();
   $arrComandos[] = '<button type="button" accesskey="P" onclick="pesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
@@ -158,7 +46,6 @@
   $objEouvRelatorioImportacaoDTO->retStrDeLogProcessamento();
 
 
-
   if (isset($_POST['txtTextoPesquisa']) && ($_POST['txtTextoPesquisa']) != ''){
 
       $objEouvRelatorioImportacaoDetalheDTO = new MdCguEouvRelatorioImportacaoDetalheDTO();
@@ -169,9 +56,15 @@
 
       $arrRelaorios = InfraArray::converterArrInfraDTO($objEouvRelatorioImportacaoDetalheRN->listar($objEouvRelatorioImportacaoDetalheDTO),'IdRelatorioImportacao');
 
-      $objEouvRelatorioImportacaoDTO->adicionarCriterio(array('IdRelatorioImportacao'),
-          array(InfraDTO::$OPER_IN),
-          array($arrRelaorios));
+      if (count($arrRelaorios) > 0) {
+        $objEouvRelatorioImportacaoDTO->adicionarCriterio(array('IdRelatorioImportacao'),
+            array(InfraDTO::$OPER_IN),
+            array($arrRelaorios));
+      }
+    else{
+      $objEouvRelatorioImportacaoDTO->adicionarCriterio(array('IdRelatorioImportacao'),array(InfraDTO::$OPER_IGUAL),array('-1'));
+    }
+
   }
 
   PaginaSEI::getInstance()->prepararOrdenacao($objEouvRelatorioImportacaoDTO, 'IdRelatorioImportacao', InfraDTO::$TIPO_ORDENACAO_DESC);
@@ -198,14 +91,6 @@
     }
 
     $strResultado = '';
-
-    if ($_GET['acao']!='infra_agendamento_tarefa_reativar'){
-      $strSumarioTabela = 'Tabela de Execuçoes.';
-      $strCaptionTabela = 'Agendamentos';
-    }else{
-      $strSumarioTabela = 'Tabela de Agendamentos Inativos.';
-      $strCaptionTabela = 'Agendamentos Inativos';
-    }
 
 
     $strResultado .= '<table width="99%" class="infraTable" summary="'.$strSumarioTabela.'">'."\n";
@@ -253,13 +138,13 @@
     $strResultado .= '</table>';
   }
 
-  if ($_GET['acao'] == 'infra_agendamento_tarefa_selecionar'){
-    $arrComandos[] = '<button type="button" accesskey="F" id="btnFecharSelecao" value="Fechar" onclick="window.close();" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
-  }else{
-    $arrComandos[] = '<button type="button" accesskey="F" id="btnFechar" value="Fechar" onclick="location.href=\''.PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.PaginaSEI::getInstance()->getAcaoRetorno().'&acao_origem='.$_GET['acao'])).'\'" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
-  }
+  $arrComandos[] = '<button type="button" accesskey="F" id="btnFechar" value="Fechar" onclick="location.href=\''.PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.PaginaSEI::getInstance()->getAcaoRetorno().'&acao_origem='.$_GET['acao'])).'\'" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
 
   $strLinkPesquisar = SessaoSEI::getInstance()->assinarLink('controlador.php?acao=md_cgu_eouv_relatorio_importacao_listar&acao_origem='.$_GET['acao']);
+
+  $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+  $arrMascaraProtocolo = explode('|',$objInfraParametro->getValor('SEI_MASCARA_NUMERO_PROCESSO_INFORMADO'));
+  $strMascaraProtocolo = trim($arrMascaraProtocolo[0]);
 
 /*}catch(Exception $e){
   PaginaSEI::getInstance()->processarExcecao($e);
@@ -289,13 +174,8 @@ PaginaSEI::getInstance()->abrirJavaScript();
 ?>
 
 function inicializar(){
-  if ('<?=$_GET['acao']?>'=='infra_agendamento_tarefa_selecionar'){
-    infraReceberSelecao();
-    document.getElementById('btnFecharSelecao').focus();
-  }else{
     document.getElementById('btnFechar').focus();
-  }
-  infraEfeitoTabelas();
+    infraEfeitoTabelas();
 }
 
 function pesquisar(){
@@ -303,13 +183,7 @@ function pesquisar(){
     document.getElementById('frmEouvRelatorioImportacaoLista').submit();
 }
 
-function executarAgendamento(comando, link){
-  if (confirm('Confirma execução do comando ' + comando + '?')){
-    document.getElementById('frmInfraAgendamentoTarefaLista').action=link;
-    document.getElementById('frmInfraAgendamentoTarefaLista').submit();
-    infraExibirAviso(false);
-  }
-}
+
 
 <?
 PaginaSEI::getInstance()->fecharJavaScript();
@@ -322,7 +196,7 @@ PaginaSEI::getInstance()->abrirBody($strTitulo,'onload="inicializar();"');
 
     ?>
   <label id="lblTextoPesquisa" class="infraLabel" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>">Pesquisar por NUP:</label>
-  <input type="text" name="txtTextoPesquisa" id="txtTextoPesquisa" onkeyup="return tratarEnter(event);" class="infraText" value="<?php echo $_POST['txtTextoPesquisa']; ?>"/>
+  <input type="text" name="txtTextoPesquisa" <?=(InfraString::isBolVazia($strMascaraProtocolo)?'':'onkeypress="return infraMascara(this,event,\''.$strMascaraProtocolo.'\');"')?> id="txtTextoPesquisa" onkeyup="return tratarEnter(event);" class="infraText" value="<?php echo $_POST['txtTextoPesquisa']; ?>"/>
 
     <?
   PaginaSEI::getInstance()->montarAreaTabela($strResultado,$numRegistros);
