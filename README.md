@@ -51,6 +51,10 @@
 
 ## Orientações Negociais:
 
+Criamos um vídeo com a demonstração do funcionamento do módulo focado na parte negocial, caso queira entender um pouco mais sobre o módulo acesse:
+
+https://www.youtube.com/watch?v=geUCx7H79Gw
+
 1. Imediatamente após a instalação com sucesso, com usuário com permissão de "Administrador" do SEI, é necessário realizar as parametrizações do módulo no menu Infra > Parâmetros alterando os seguintes Parâmetros:
 
 - EOUV_DATA_INICIAL_IMPORTACAO_MANIFESTACOES: Colocar a Data Inicial no formato (DD/MM/AAAA) para carregar as manifestações do e-Ouv. Sugerimos que seja colocada a data atual para que apenas as novas manifestações sejam importadas para o SEI.
