@@ -23,9 +23,33 @@
 
   SessaoSEI::getInstance()->validarLink();
 
+  PaginaSEI::getInstance()->prepararSelecao('servico_selecionar');
+
   SessaoSEI::getInstance()->validarPermissao($_GET['acao']);
 
+  $strParametros = '&id_relatorio_importacao='.$_GET['id_relatorio_importacao'];
+
   switch($_GET['acao']){
+
+        case 'md_cgu_eouv_relatorio_importacao_excluir':
+
+          try{
+            $arrStrIds = PaginaSEI::getInstance()->getArrStrItensSelecionados();
+            $arrObjRelatorioImportacaoDetalheDTO = array();
+            for ($i=0;$i<count($arrStrIds);$i++){
+              $objEouvRelatorioImportacaoDetalheDTO = new MdCguEouvRelatorioImportacaoDetalheDTO();
+              $objEouvRelatorioImportacaoDetalheDTO->setNumIdRelatorioImportacao($_POST['hdnIdRelatorioImportacao']);
+              $objEouvRelatorioImportacaoDetalheDTO->setStrProtocoloFormatado($arrStrIds[$i]);
+              $arrObjEouvRelatorioImportacaoDetalheDTO[] = $objEouvRelatorioImportacaoDetalheDTO;
+            }
+            $objEouvRelatorioImportacaoDetalheRN = new MdCguEouvRelatorioImportacaoDetalheRN();
+            $objEouvRelatorioImportacaoDetalheRN->excluir($arrObjEouvRelatorioImportacaoDetalheDTO);
+            PaginaSEI::getInstance()->setStrMensagem('Operação realizada com sucesso.');
+          }catch(Exception $e){
+            PaginaSEI::getInstance()->processarExcecao($e);
+          }
+          header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_origem'].'&acao_origem='.$_GET['acao'].$strParametros));
+          die;
 
         case 'md_cgu_eouv_relatorio_importacao_detalhar':
           $strTitulo = 'Detalhamento de Importações Realizadas';
@@ -53,7 +77,10 @@
   $objEouvRelatorioImportacaoDetalheDTO->retStrSinSucesso();
   $objEouvRelatorioImportacaoDetalheDTO->retDthDthImportacao();
   $objEouvRelatorioImportacaoDetalheDTO->retStrDescricaoLog();
-  $objEouvRelatorioImportacaoDetalheDTO->setNumIdRelatorioImportacao($_GET['id_relatorio_importacao']);
+
+  $numIdRelatorio = $_GET['id_relatorio_importacao'];
+
+  $objEouvRelatorioImportacaoDetalheDTO->setNumIdRelatorioImportacao($numIdRelatorio);
 
   PaginaSEI::getInstance()->prepararOrdenacao($objEouvRelatorioImportacaoDetalheDTO, 'ProtocoloFormatado', InfraDTO::$TIPO_ORDENACAO_ASC);
   PaginaSEI::getInstance()->prepararPaginacao($objEouvRelatorioImportacaoDetalheDTO);
@@ -69,13 +96,20 @@
     $bolCheck = false;
 
     if ($_GET['acao']=='md_cgu_eouv_relatorio_importacao_detalhar'){
-      $bolAcaoConsultar = false;//SessaoSEI::getInstance()->verificarPermissao('infra_agendamento_tarefa_consultar');
+
+      $bolAcaoConsultar = false;
       //$bolCheck = true;
       $bolAcaoExecutar = false;
-
+      $bolAcaoExcluir = SessaoSEI::getInstance()->verificarPermissao('md_cgu_eouv_relatorio_importacao_excluir');
     }else{
       $bolAcaoConsultar = SessaoSEI::getInstance()->verificarPermissao('md_cgu_eouv_relatorio_importacao_detalhe');
 
+    }
+
+    if ($bolAcaoExcluir){
+      $bolCheck = true;
+      $arrComandos[] = '<button type="button" accesskey="E" id="btnExcluir" value="Excluir" onclick="acaoExclusaoMultipla();" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
+      $strLinkExcluir = SessaoSEI::getInstance()->assinarLink('controlador.php?acao=md_cgu_eouv_relatorio_importacao_excluir&acao_origem='.$_GET['acao'].$strParametros);
     }
 
     $strResultado = '';
@@ -83,11 +117,16 @@
     $strResultado .= '<table width="99%" class="infraTable" summary="'.$strSumarioTabela.'">'."\n";
     $strResultado .= '<caption class="infraCaption">'.PaginaSEI::getInstance()->gerarCaptionTabela($strCaptionTabela,$numRegistros).'</caption>';
     $strResultado .= '<tr>';
+    if ($bolCheck) {
+      $strResultado .= '<th class="infraTh" width="1%">'.PaginaSEI::getInstance()->getThCheck().'</th>'."\n";
+    }
 
     $strResultado .= '<th class="infraTh" width="15%">'.PaginaSEI::getInstance()->getThOrdenacao($objEouvRelatorioImportacaoDetalheDTO,'Protocolo Formatado','ProtocoloFormatado',$arrObjEouvRelatorioImportacaoDetalheDTO).'</th>'."\n";
     $strResultado .= '<th class="infraTh" width="10%">'.PaginaSEI::getInstance()->getThOrdenacao($objEouvRelatorioImportacaoDetalheDTO,'Sucesso','SinSucesso',$arrObjEouvRelatorioImportacaoDetalheDTO).'</th>'."\n";
     $strResultado .= '<th class="infraTh" width="10%">'.PaginaSEI::getInstance()->getThOrdenacao($objEouvRelatorioImportacaoDetalheDTO,'Data Importacao','DthImportacao',$arrObjEouvRelatorioImportacaoDetalheDTO).'</th>'."\n";
     $strResultado .= '<th class="infraTh">'.PaginaSEI::getInstance()->getThOrdenacao($objEouvRelatorioImportacaoDetalheDTO,'Detalhe','DescricaoLog',$arrObjEouvRelatorioImportacaoDetalheDTO).'</th>'."\n";
+    $strResultado .= '<th class="infraTh" width="25%">Ações</th>'."\n";
+
     $strResultado .= '</tr>'."\n";
     $strCssTr='';
     for($i = 0;$i < $numRegistros; $i++){
@@ -96,10 +135,10 @@
       $strResultado .= $strCssTr;
 
       if ($bolCheck){
-        $strResultado .= '<td>'.PaginaSEI::getInstance()->getTrCheck($i,$arrObjEouvRelatorioImportacaoDTO[$i]->getNumIdInfraAgendamentoTarefa(),$arrObjEouvRelatorioImportacaoDTO[$i]->getNumIdRelatorioImportacao()).'</td>';
+        $strResultado .= '<td>'.PaginaSEI::getInstance()->getTrCheck($i,trim($arrObjEouvRelatorioImportacaoDetalheDTO[$i]->getStrProtocoloFormatado()),trim($arrObjEouvRelatorioImportacaoDetalheDTO[$i]->getStrProtocoloFormatado())).'</td>';
       }
 
-      $strResultado .= '<td>'.$arrObjEouvRelatorioImportacaoDetalheDTO[$i]->getStrProtocoloFormatado().'</td>';
+      $strResultado .= '<td>'.trim($arrObjEouvRelatorioImportacaoDetalheDTO[$i]->getStrProtocoloFormatado()).'</td>';
       $strResultado .= '<td align="center">'.$arrObjEouvRelatorioImportacaoDetalheDTO[$i]->getStrSinSucesso().'</td>';
       $strResultado .= '<td align="center">'.$arrObjEouvRelatorioImportacaoDetalheDTO[$i]->getDthDthImportacao().'</td>';
       $strResultado .= '<td align="center">'.$arrObjEouvRelatorioImportacaoDetalheDTO[$i]->getStrDescricaoLog().'</td>';
@@ -109,8 +148,10 @@
       $strId = $arrObjEouvRelatorioImportacaoDetalheDTO[$i]->getNumIdRelatorioImportacao();
       //$strDescricao = PaginaSEI::getInstance()->formatarParametrosJavaScript($arrObjEouvRelatorioImportacaoDTO[$i]->getStrComando());
 
-      if ($bolAcaoConsultar){
-        $strResultado .= '<a href="'.PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=md_cgu_eouv_relatorio_importacao_detalhar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_reatorio_importacao='.$arrObjEouvRelatorioImportacaoDTO[$i]->getNumIdRelatorioImportacao())).'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getDiretorioImagensGlobal().'/consultar.gif" title="Detalhar Importação" alt="Detalhar Importacação" class="infraImg" /></a>&nbsp;';
+      $strResultado .= '<td align="center">';
+
+      if ($bolAcaoExcluir){
+        $strResultado .= '<a href="#ID-'.trim($arrObjEouvRelatorioImportacaoDetalheDTO[$i]->getStrProtocoloFormatado()).'"  onclick="acaoExcluir(\''.trim($arrObjEouvRelatorioImportacaoDetalheDTO[$i]->getStrProtocoloFormatado()).'\',\''.PaginaSEI::tratarHTML(trim($arrObjEouvRelatorioImportacaoDetalheDTO[$i]->getStrProtocoloFormatado())).'\');" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="imagens/excluir.gif" title="Excluir Registro" alt="Excluir Registro" class="infraImg" /></a>&nbsp;';
       }
 
       $strResultado .= '</td></tr>'."\n";
@@ -170,12 +211,37 @@ function executarAgendamento(comando, link){
   }
 }
 
+<? if ($bolAcaoExcluir){ ?>
+  function acaoExcluir(id,desc){
+  if (confirm("Confirma exclusão do Registro \""+desc+"\"?")){
+  document.getElementById('hdnInfraItemId').value=id;
+  document.getElementById('frmEouvRelatorioImportacaoLista').action='<?=$strLinkExcluir?>';
+  document.getElementById('frmEouvRelatorioImportacaoLista').submit();
+  }
+  }
+
+  function acaoExclusaoMultipla(){
+  if (document.getElementById('hdnInfraItensSelecionados').value==''){
+  alert('Nenhum Processo selecionado.');
+  return;
+  }
+  if (confirm("Confirma exclusão dos Processos selecionados?")){
+  document.getElementById('hdnInfraItemId').value='';
+  document.getElementById('frmEouvRelatorioImportacaoLista').action='<?=$strLinkExcluir?>';
+  document.getElementById('frmEouvRelatorioImportacaoLista').submit();
+  }
+  }
+<? } ?>
+
 <?
 PaginaSEI::getInstance()->fecharJavaScript();
 PaginaSEI::getInstance()->fecharHead();
 PaginaSEI::getInstance()->abrirBody($strTitulo,'onload="inicializar();"');
 ?>
 <form id="frmEouvRelatorioImportacaoLista" method="post" action="<?=PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao']))?>">
+
+  <input type="hidden" id="hdnIdRelatorioImportacao" name="hdnIdRelatorioImportacao" value="<?=$numIdRelatorio?>" />
+
   <?
   PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);
   PaginaSEI::getInstance()->montarAreaTabela($strResultado,$numRegistros);

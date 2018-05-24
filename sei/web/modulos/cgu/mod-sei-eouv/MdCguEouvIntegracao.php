@@ -20,7 +20,7 @@ class MdCguEouvIntegracao extends SeiIntegracao
 
     public function getVersao()
     {
-        return '2.0.0';
+        return '2.0.5';
     }
 
     public function getInstituicao()
@@ -62,6 +62,10 @@ class MdCguEouvIntegracao extends SeiIntegracao
                 return true;
 
             case 'md_cgu_eouv_relatorio_importacao_detalhar':
+                require_once dirname(__FILE__).'/md_cgu_eouv_relatorio_importacao_detalhar.php';
+                return true;
+
+            case 'md_cgu_eouv_relatorio_importacao_excluir':
                 require_once dirname(__FILE__).'/md_cgu_eouv_relatorio_importacao_detalhar.php';
                 return true;
 

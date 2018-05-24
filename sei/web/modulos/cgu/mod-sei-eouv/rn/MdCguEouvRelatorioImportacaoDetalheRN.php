@@ -122,6 +122,22 @@ class MdCguEouvRelatorioImportacaoDetalheRN extends InfraRN {
         }
     }
 
-  
+    protected function excluirControlado($arrObjEouvRelatorioImportacaoDetalheDTO){
+        try {
+
+            //Valida Permissao
+            SessaoSEI::getInstance()->validarAuditarPermissao('md_cgu_eouv_relatorio_importacao_excluir',__METHOD__,$arrObjEouvRelatorioImportacaoDetalheDTO);
+
+            $objMdCguEouvRelatorioImportacaoDetalheBD = new MdCguEouvRelatorioImportacaoDetalheBD($this->getObjInfraIBanco());
+            for($i=0;$i<count($arrObjEouvRelatorioImportacaoDetalheDTO);$i++){
+                $objMdCguEouvRelatorioImportacaoDetalheBD->excluir($arrObjEouvRelatorioImportacaoDetalheDTO[$i]);
+            }
+
+            //Auditoria
+
+        }catch(Exception $e){
+            throw new InfraException('Erro excluindo Processos.',$e);
+        }
+    }
 }
 ?>
