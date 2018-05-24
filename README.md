@@ -89,3 +89,11 @@ Obs: Para efeitos de testes e homologação utilizar o ambiente de treinamento: 
 |4                         |`xxx`                   |Sugestão                  |
 |5                         |`xxx`                   |Solicitação               |
 |6                         |`xxx`                   |Simplifique               |
+
+## Atualização da versão 2.0.5
+
+Caso você já tenha o módulo instalado e esteja apenas realizando a atualização do módulo para a versão 2.0.5 é necessário adicionar os seguintes itens ao SIP
+
+1. Adicionar o recurso md_cgu_eouv_relatorio_importacao_excluir com o link: controlador.php?acao=md_cgu_eouv_relatorio_importacao_excluir
+2. Adicionar esse novo recurso ao perfil de Administrador do módulo.
+
