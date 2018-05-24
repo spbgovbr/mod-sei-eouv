@@ -28,7 +28,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
      * @return mixed
      * @throws Exception
      */
-    public function executarServicoConsultaManifestacoes($objWS, $usuarioWebService, $senhaUsuarioWebService, $ultimaDataExecucaoFormatoEouv, $dataAtualFormatoEOuv, $numprotocolo = null)
+    public function executarServicoConsultaManifestacoes($objWS, $usuarioWebService, $senhaUsuarioWebService, $ultimaDataExecucaoFormatoEouv, $dataAtualFormatoEOuv, $numprotocolo = null, $numIdRelatorio = null)
     {
 
         $arrParametros = array(
@@ -54,6 +54,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $retornoWs = $objWS->call('GetListaManifestacaoOuvidoria', $arrParametros, '', '', false, true);
 
         $soapError = $objWS->getError();
+
         if (!empty($soapError)) {
             //print_r('<br/><br/>Erro Serviço');
             //print_r($soapError);
@@ -72,9 +73,35 @@ class MdCguEouvAgendamentoRN extends InfraRN
         }
 
         $intIdCodigoErroExecucao = $retornoWs['GetListaManifestacaoOuvidoriaResult']['CodigoErro'];
+
         if ($intIdCodigoErroExecucao > 0) {
-            throw new Exception($retornoWs['GetListaManifestacaoOuvidoriaResult']['DescricaoErro']);
+
+            //Faz tratamento diferenciado para consulta por Protocolo específico
+            if(!is_null($numprotocolo)){
+                //Se for erro de permissão para um protocolo específico segue o fluxo, caso contrário para a execução
+                if ((strpos($retornoWs['GetListaManifestacaoOuvidoriaResult']['DescricaoErro'], 'Usuário Sem Acesso a essa Manifestação') !== false) == false) {
+                    throw new Exception($retornoWs['GetListaManifestacaoOuvidoriaResult']['DescricaoErro']);
+                }
+                else{
+                    $this->gravarLogLinha($this->formatarProcesso($numprotocolo),$numIdRelatorio,$retornoWs['GetListaManifestacaoOuvidoriaResult']['DescricaoErro'],'N');
+                    $retornoWs = null;
+                }
+            }
+
+            else {
+
+                $objEouvRelatorioImportacaoRN2 = new MdCguEouvRelatorioImportacaoRN();
+
+                //Grava a execução com sucesso se tiver corrido tudo bem
+                $objEouvRelatorioImportacaoDTO4 = new MdCguEouvRelatorioImportacaoDTO();
+
+                $objEouvRelatorioImportacaoDTO4->setNumIdRelatorioImportacao($numIdRelatorio);
+                $objEouvRelatorioImportacaoDTO4->setStrSinSucesso('N');
+                $objEouvRelatorioImportacaoDTO4->setStrDeLogProcessamento($retornoWs['GetListaManifestacaoOuvidoriaResult']['DescricaoErro']);
+                $objEouvRelatorioImportacaoRN2->alterar($objEouvRelatorioImportacaoDTO4);
+            }
         }
+
 
         return $retornoWs;
     }
@@ -161,7 +188,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
 
     }
 
-    public function obterManifestacoesComErro($objWS, $usuarioWebService, $senhaUsuarioWebService, $ultimaDataExecucaoFormatoEouv, $dataAtualFormatoEOuv)
+    public function obterManifestacoesComErro($objWS, $usuarioWebService, $senhaUsuarioWebService, $ultimaDataExecucaoFormatoEouv, $dataAtualFormatoEOuv, $numIdRelatorio)
     {
         $objEouvRelatorioImportacaoDetalheDTO = new MdCguEouvRelatorioImportacaoDetalheDTO();
         $objEouvRelatorioImportacaoDetalheDTO->retStrProtocoloFormatado();
@@ -171,22 +198,36 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $objListaErros = $objEouvRelatorioImportacaoDetalheRN->listar($objEouvRelatorioImportacaoDetalheDTO);
 
         $arrResult = array();
+        $arrProtocolos = array();
 
         foreach($objListaErros as $erro){
+
             $numProtocolo = preg_replace("/[^0-9]/", "", $erro->getStrProtocoloFormatado());
-            $retornoWsErro = $this->executarServicoConsultaManifestacoes($objWS, $usuarioWebService, $senhaUsuarioWebService, null, $dataAtualFormatoEOuv, $numProtocolo);
-            $arrRetornoWs = $this->verificaRetornoWS($retornoWsErro['GetListaManifestacaoOuvidoriaResult']['ManifestacoesOuvidoria']['ManifestacaoOuvidoria']);
-            if (is_array($arrRetornoWs)){
-                $arrResult = array_merge($arrResult, $arrRetornoWs);
+
+            //Se já estiver na lista não faz novamente para determinado protocolo
+            if (!in_array($numProtocolo, $arrProtocolos)){
+
+                //Adiciona no array de Protocolos
+                array_push($arrProtocolos, $numProtocolo);
+
+                $retornoWsErro = $this->executarServicoConsultaManifestacoes($objWS, $usuarioWebService, $senhaUsuarioWebService, null, $dataAtualFormatoEOuv, $numProtocolo, $numIdRelatorio);
+
+                if (!is_null($retornoWsErro)){
+                    $arrRetornoWs = $this->verificaRetornoWS($retornoWsErro['GetListaManifestacaoOuvidoriaResult']['ManifestacoesOuvidoria']['ManifestacaoOuvidoria']);
+                    $arrResult = array_merge($arrResult, $arrRetornoWs);
+                }
             }
         }
+
         return $arrResult;
     }
 
     public function validarEnderecoWebService($urlWebService){
+
         if (!@file_get_contents($urlWebService)) {
             throw new InfraException('Arquivo WSDL ' . $urlWebService . ' não encontrado.');
         }
+
     }
 
     public function gerarObjWebService($urlWebService){
@@ -293,9 +334,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
         InfraDebug::getInstance()->setBolEcho(false);
         InfraDebug::getInstance()->limpar();
 
-        LogSEI::getInstance()->gravar('Rotina de Importação de Manifestações do E-Ouv');
-
-        //$strWSDL = 'http://ares-h.df.cgu/Ouvidorias/Servicos/ServicoConsultaManifestacao.svc?singleWsdl';
+        LogSEI::getInstance()->gravar('Rotina de Importação de Manifestações do E-Ouv', InfraLog::$INFORMACAO);
 
         global $objEouvRelatorioImportacaoDTO,
                $objEouvRelatorioImportacaoRN,
@@ -385,14 +424,18 @@ class MdCguEouvAgendamentoRN extends InfraRN
             $objWS = $this->gerarObjWebService($urlWebServiceEOuv);
             $objWSAnexo = $this->gerarObjWebService($urlWebServiceAnexosEOuv);
 
-            $retornoWs = $this->executarServicoConsultaManifestacoes($objWS, $usuarioWebService, $senhaUsuarioWebService, $ultimaDataExecucaoFormatoEouv, $dataAtualFormatoEOuv);
-            $arrComErro = $this->obterManifestacoesComErro($objWS, $usuarioWebService, $senhaUsuarioWebService, $ultimaDataExecucaoFormatoEouv, $dataAtualFormatoEOuv);
+            $retornoWs = $this->executarServicoConsultaManifestacoes($objWS, $usuarioWebService, $senhaUsuarioWebService, $ultimaDataExecucaoFormatoEouv, $dataAtualFormatoEOuv, null, $idRelatorioImportacao);
+            $arrComErro = $this->obterManifestacoesComErro($objWS, $usuarioWebService, $senhaUsuarioWebService, $ultimaDataExecucaoFormatoEouv, $dataAtualFormatoEOuv, $idRelatorioImportacao);
 
             $arrManifestacoes = array();
+
             if (is_array ($retornoWs['GetListaManifestacaoOuvidoriaResult']['ManifestacoesOuvidoria'])){
                 $arrManifestacoes = $this->verificaRetornoWS($retornoWs['GetListaManifestacaoOuvidoriaResult']['ManifestacoesOuvidoria']['ManifestacaoOuvidoria']);
             }
-            $arrManifestacoes = array_merge($arrManifestacoes, $arrComErro);
+
+            if (is_array($arrComErro)){
+                $arrManifestacoes = array_merge($arrManifestacoes, $arrComErro);
+            }
 
             if (count($arrManifestacoes) > 0){
                 foreach ($arrManifestacoes as $retornoWsLinha) {
@@ -401,6 +444,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
             }
 
             $textoMensagemFinal = 'Execução Finalizada com Sucesso!';
+
             if ($ocorreuErroEmProtocolo){
                 $textoMensagemFinal = $textoMensagemFinal . ' Porém ocorreram erros em 1 ou mais protocolos.';
             }
@@ -462,8 +506,8 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $this->limparErrosParaNup($numProtocoloFormatado);
 
         if (!isset($retornoWsLinha['IdTipoManifestacao'])) {
-            //print_r("Numero Protocolo Formatado:" . $numProtocoloFormatado);
-            //print_r($retornoWsLinha);
+            print_r("Numero Protocolo Formatado:" . $numProtocoloFormatado);
+            print_r($retornoWsLinha);
             $this->gravarLogLinha($numProtocoloFormatado, $idRelatorioImportacao, 'Tipo de processo não foi informado.', 'N');
         } else {
 
@@ -521,7 +565,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
 
             $arrDocumentos = $this->gerarAnexosProtocolo($numProtocoloFormatado);
             $documentoManifestacao =  $this->gerarPDFPedidoInicial($retornoWsLinha);
-            LogSEI::getInstance()->gravar('Importação de Manifestação ' . $numProtocoloFormatado . ': total de  Anexos configurados: ' . count($arrDocumentos));
+            LogSEI::getInstance()->gravar('Importação de Manifestação ' . $numProtocoloFormatado . ': total de  Anexos configurados: ' . count($arrDocumentos), InfraLog::$INFORMACAO);
 
             array_push($arrDocumentos, $documentoManifestacao);
 
@@ -532,6 +576,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
             $this->gravarLogLinha($numProtocoloFormatado, $idRelatorioImportacao, 'Protocolo ' . $retornoWsLinha['numProtocolo'] . ' gravado com sucesso.', 'S');
 
         } catch (Exception $e) {
+
             if ($objSaidaGerarProcedimentoAPI != null and $objSaidaGerarProcedimentoAPI->getIdProcedimento() > 0){
                 $this->excluirProcessoComErro($objSaidaGerarProcedimentoAPI->getIdProcedimento());
             }
@@ -947,7 +992,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
                     else
                     {
                         $ocorreuErroAdicionarAnexo = true;
-                        LogSEI::getInstance()->gravar('Importação de Manifestação ' . $numProtocoloFormatado . ': Arquivo ' . $strNomeArquivoOriginal . ' possui extensão inválida.');
+                        LogSEI::getInstance()->gravar('Importação de Manifestação ' . $numProtocoloFormatado . ': Arquivo ' . $strNomeArquivoOriginal . ' possui extensão inválida.', InfraLog::$INFORMACAO);
                         continue;
                     }
 
@@ -982,6 +1027,23 @@ class MdCguEouvAgendamentoRN extends InfraRN
             PaginaSEI::getInstance()->processarExcecao($e);
         }
 
+    }
+
+    public static function formatarProcesso($strProcesso) {
+
+        $strProcesso = InfraUtil::retirarFormatacao($strProcesso);
+
+        if (strlen($strProcesso)==0){
+            return '';
+        }
+
+        if (strlen($strProcesso) == 17){
+            $strProcesso = substr($strProcesso,0,5).".".
+                substr($strProcesso,5,6)."/".
+                substr($strProcesso,11,4)."-".
+                substr($strProcesso,15,2);
+        }
+        return $strProcesso;
     }
 }
 

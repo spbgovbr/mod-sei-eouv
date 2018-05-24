@@ -11,7 +11,7 @@ require_once dirname(__FILE__).'/../web/Sip.php';
 class MdCguEouvAtualizadorSipRN extends InfraRN{
 
     private $numSeg = 0;
-    private $versaoAtualDesteModulo = '1.0.0';
+    private $versaoAtualDesteModulo = '2.0.5';
     private $nomeDesteModulo = 'EOUV - Integração com sistema E-ouv';
     private $historicoVersoes = array('1.0.0');
     private $prefixoParametro = 'MD_CGU_EOUV';
@@ -170,6 +170,9 @@ class MdCguEouvAtualizadorSipRN extends InfraRN{
         $this->adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador,
             'md_cgu_eouv_relatorio_importacao_detalhar', 'Relatório Detalhado de importação de manifestações do EOUV',
             'controlador.php?acao=md_cgu_eouv_relatorio_importacao_detalhar');
+		$this->adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador,
+            'md_cgu_eouv_relatorio_importacao_excluir', 'Excluir Item no Relatório Detalhado de importação de manifestações do EOUV',
+            'controlador.php?acao=md_cgu_eouv_relatorio_importacao_excluir');
         $numIdRecursoRelatorioImportacaoEouvSei = $this->adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador,
             'md_cgu_eouv_relatorio_importacao_listar', 'Relatório de importação de manifestações do EOUV',
             'controlador.php?acao=md_cgu_eouv_relatorio_importacao_listar');

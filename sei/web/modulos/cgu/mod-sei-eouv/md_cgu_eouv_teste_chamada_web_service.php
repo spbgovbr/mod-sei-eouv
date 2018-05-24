@@ -6,6 +6,8 @@
  * Time: 16:08
  */
 
+error_reporting(E_ALL); ini_set('display_errors', '1');
+
 require_once dirname(__FILE__) . '/../../../SEI.php';
 
 $objEouvWS = new MdCguEouvWS();
