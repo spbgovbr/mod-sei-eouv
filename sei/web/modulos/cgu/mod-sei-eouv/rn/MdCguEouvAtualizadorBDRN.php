@@ -12,7 +12,7 @@ class MdCguEouvAtualizadorBDRN extends InfraRN
 {
     private $numSeg = 0;
     private $versaoAtualDesteModulo = '1.0.0';
-    private $nomeDesteModulo = 'EOUV - Integração com sistema E-ouv';
+    private $nomeDesteModulo = 'EOUV - IntegraÃ§Ã£o com sistema E-ouv';
     private $prefixoParametro = 'MD_CGU_EOUV';
     private $nomeParametroVersaoModulo = 'VERSAO_MODULO_CGU_EOUV';
 
@@ -63,10 +63,10 @@ class MdCguEouvAtualizadorBDRN extends InfraRN
             $strVersaoModuloEOuv = $objInfraParametro->getValor($this->prefixoParametro . $this->nomeParametroVersaoModulo, false);
 
             //VERIFICANDO QUAL VERSAO DEVE SER INSTALADA NESTA EXECUCAO
-            //nao tem nenhuma versao ainda, instalar primeira versão
+            //nao tem nenhuma versao ainda, instalar primeira versÃ£o
             if (InfraString::isBolVazia($strVersaoModuloEOuv)) {
                 $this->instalarv100();
-                $this->logar('ATUALIZAÇÔES DA VERSÃO ' . $this->versaoAtualDesteModulo . ' DO MODULO ' . $this->nomeDesteModulo . ' INSTALADAS COM SUCESSO NA BASE DO SEI');
+                $this->logar('ATUALIZAÃ‡Ã”ES DA VERSÃƒO ' . $this->versaoAtualDesteModulo . ' DO MODULO ' . $this->nomeDesteModulo . ' INSTALADAS COM SUCESSO NA BASE DO SEI');
                 $this->finalizar('FIM', false);
             }
 
@@ -82,7 +82,7 @@ class MdCguEouvAtualizadorBDRN extends InfraRN
             $this->finalizar($e->getMessage(), true);
             print_r($e);
             die;
-            throw new InfraException('Erro atualizando versão.', $e);
+            throw new InfraException('Erro atualizando versÃ£o.', $e);
         }
 
     }
@@ -122,7 +122,7 @@ class MdCguEouvAtualizadorBDRN extends InfraRN
 
         if (!$bolErro) {
             $this->numSeg = InfraUtil::verificarTempoProcessamento($this->numSeg);
-            $this->logar('TEMPO TOTAL DE EXECUÇÃO: ' . $this->numSeg . ' s');
+            $this->logar('TEMPO TOTAL DE EXECUÃ‡ÃƒO: ' . $this->numSeg . ' s');
         } else {
             $strMsg = 'ERRO: ' . $strMsg;
         }
@@ -147,7 +147,7 @@ class MdCguEouvAtualizadorBDRN extends InfraRN
 
         $this->logar('EXECUTANDO A INSTALACAO DA VERSAO 1.0.0 DO MODULO ' . $this->nomeDesteModulo . ' NA BASE DO SEI');
 
-        //6.1	Para o mapeamento DE-PARA entre os Tipos de Manifestação E-ouv e Tipo de processo SEI
+        //6.1	Para o mapeamento DE-PARA entre os Tipos de ManifestaÃ§Ã£o E-ouv e Tipo de processo SEI
         $this->logar('CRIANDO A TABELA md_eouv_depara_importacao');
 
         BancoSEI::getInstance()->executarSql('CREATE TABLE md_eouv_depara_importacao(id_tipo_manifestacao_eouv ' . $objInfraMetaBD->tipoNumero() . ' NOT NULL ,
@@ -159,11 +159,11 @@ class MdCguEouvAtualizadorBDRN extends InfraRN
         $objInfraMetaBD->criarIndice('md_eouv_depara_importacao', 'i01_md_eouv_depara_importacao', array(id_tipo_procedimento));
 
         $this->logar('CRIANDO REGISTROS PARA A TABELA md_eouv_depara_importacao');
-        BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'1\', \'Denúncia\', \'100000335\');');
-        BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'2\', \'Reclamação\', \'100000336\');');
+        BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'1\', \'DenÃºncia\', \'100000335\');');
+        BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'2\', \'ReclamaÃ§Ã£o\', \'100000336\');');
         BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'3\', \'Elogio\', \'100000333\');');
-        BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'4\', \'Sugestão\', \'100000338\');');
-        BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'5\', \'Solicitação\', \'100000334\');');
+        BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'4\', \'SugestÃ£o\', \'100000338\');');
+        BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_depara_importacao (id_tipo_manifestacao_eouv, de_tipo_manifestacao_eouv, id_tipo_procedimento) VALUES (\'5\', \'SolicitaÃ§Ã£o\', \'100000334\');');
 
         $this->logar('CRIANDO A TABELA md_eouv_rel_import');
         BancoSEI::getInstance()->executarSql('CREATE TABLE md_eouv_rel_import(id_md_eouv_rel_import ' . $objInfraMetaBD->tipoNumero() . ' NOT NULL ,
@@ -194,7 +194,7 @@ class MdCguEouvAtualizadorBDRN extends InfraRN
         }
 
 
-        $this->logar('CRIANDO Parâmetros do Sei');
+        $this->logar('CRIANDO ParÃ¢metros do Sei');
         $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
         $objInfraParametro->setValor('EOUV_URL_WEBSERVICE_IMPORTACAO_ANEXO_MANIFESTACAO', 'https://sistema.ouvidorias.gov.br/Servicos/ServicoAnexosManifestacao.svc');
         $objInfraParametro->setValor('EOUV_URL_WEBSERVICE_IMPORTACAO_MANIFESTACAO', 'https://sistema.ouvidorias.gov.br/Servicos/ServicoConsultaManifestacao.svc');
@@ -210,8 +210,8 @@ class MdCguEouvAtualizadorBDRN extends InfraRN
         session_start();
         $objInfraAgendamentoTarefaDTO = new InfraAgendamentoTarefaDTO();
         $objInfraAgendamentoTarefaDTO->setNumIdInfraAgendamentoTarefa(null);
-        $objInfraAgendamentoTarefaDTO->setStrDescricao('Rotina responsável pela execução da importação de manifestações cadastradas no E-Ouv que serão importadas para o SEI como um novo processo. Se baseia na data da última execução com sucesso até a data atual.');
-        $objInfraAgendamentoTarefaDTO->setStrComando('MdCguEouvAgendamentoRN :: executarImportacaoManifestacaoEOuv');
+        $objInfraAgendamentoTarefaDTO->setStrDescricao('Rotina responsÃ¡vel pela execuÃ§Ã£o da importaÃ§Ã£o de manifestaÃ§Ãµes cadastradas no E-Ouv que serÃ£o importadas para o SEI como um novo processo. Se baseia na data da Ãºltima execuÃ§Ã£o com sucesso atÃ© a data atual.');
+        $objInfraAgendamentoTarefaDTO->setStrComando('MdCguEouvAgendamentoRN::executarImportacaoManifestacaoEOuv');
         $objInfraAgendamentoTarefaDTO->setStrStaPeriodicidadeExecucao('D');
 
         $objInfraAgendamentoTarefaDTO->setStrPeriodicidadeComplemento('1');
@@ -235,7 +235,7 @@ class MdCguEouvAtualizadorBDRN extends InfraRN
         $objUsuarioDTO->setNumIdOrgao(0);
         $objUsuarioDTO->setStrIdOrigem(null);
         $objUsuarioDTO->setStrSigla('EOUV');
-        $objUsuarioDTO->setStrNome('Integração com sistema E-Ouv');
+        $objUsuarioDTO->setStrNome('IntegraÃ§Ã£o com sistema E-Ouv');
         $objUsuarioDTO->setNumIdContato(null);
         $objUsuarioDTO->setStrStaTipo(UsuarioRN::$TU_SISTEMA);
         $objUsuarioDTO->setStrSenha(null);
@@ -244,19 +244,19 @@ class MdCguEouvAtualizadorBDRN extends InfraRN
         $objUsuarioRN = new UsuarioRN();
         $objUsuarioDTO = $objUsuarioRN->cadastrarRN0487($objUsuarioDTO);
 
-        $this->logar('Criando Serviço CadastrarManifestacao NA BASE DO SEI...');
+        $this->logar('Criando ServiÃ§o CadastrarManifestacao NA BASE DO SEI...');
         $objServicoDTO = new ServicoDTO();
         $objServicoDTO->setNumIdServico(null);
         $objServicoDTO->setNumIdUsuario($objUsuarioDTO->getNumIdUsuario());
         $objServicoDTO->setStrIdentificacao('CadastrarManifestacao');
-        $objServicoDTO->setStrDescricao('Cadastrar Manifestação Importada do sistema E-Ouv');
+        $objServicoDTO->setStrDescricao('Cadastrar ManifestaÃ§Ã£o Importada do sistema E-Ouv');
         $objServicoDTO->setStrServidor('*');
         $objServicoDTO->setStrSinLinkExterno('N');
         $objServicoDTO->setStrSinAtivo('S');
         $objServicoRN = new ServicoRN();
         $objServicoDTO = $objServicoRN->cadastrar($objServicoDTO);
 
-        $this->logar('Criando Operação NA BASE DO SEI...');
+        $this->logar('Criando OperaÃ§Ã£o NA BASE DO SEI...');
         $objOperacaoServicoDTO = new OperacaoServicoDTO();
         $objOperacaoServicoDTO->setNumIdOperacaoServico(null);
         $objOperacaoServicoDTO->setNumIdServico($objServicoDTO->getNumIdServico());
