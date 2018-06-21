@@ -61,6 +61,8 @@ https://www.youtube.com/watch?v=geUCx7H79Gw
 
 - EOUV_ID_SERIE_DOCUMENTO_EXTERNO_DADOS_MANIFESTACAO: Quando a rotina for executada ela criará um documento PDF com os dados da Manifestação do EOUV que será anexada ao processo. Esse parâmetro será usado para dizer qual o Tipo de Documento será usado para criar esse documento. Lembrando que deve ser do Grupo de Documentos Externos. Para verificar os tipos existentes acesse Administração > Tipos de Documento > Listar.
 
+- ID_SERIE_EXTERNO_OUVIDORIA: Quando a rotina importar um documento da Manifestação no Eouv usará esse código para inserir no campo Tipo Docuemnto. Para verificar os tipos existentes acesse Administração > Tipos de Documento > Listar.
+
 - EOUV_USUARIO_ACESSO_WEBSERVICE: Nome de usuário para acesso aos WebServices do e-Ouv.
 Este nome de usuário é gerado para cada órgão especificamente para consumir os Webservices do e-Ouv.
 Caso ainda não possua esse usuário e a senha abaixo entrar em contato através do e-mail abaixo solicitando o mesmo: marcos.silva@cgu.gov.br
