@@ -18,6 +18,8 @@ class MdCguEouvAgendamentoINT extends InfraINT {
 
     $objEouvRelatorioImportacaoDTO=new MdCguEouvRelatorioImportacaoDTO();
     $objEouvRelatorioImportacaoDTO->retDthDthImportacao();
+    $objEouvRelatorioImportacaoDTO->retDthDthPeriodoInicial();
+    $objEouvRelatorioImportacaoDTO->retDthDthPeriodoFinal();
     $objEouvRelatorioImportacaoDTO->retNumIdRelatorioImportacao();
     $objEouvRelatorioImportacaoDTO->setStrSinSucesso('S');
     $objEouvRelatorioImportacaoDTO->setOrdDthDthImportacao(InfraDTO::$TIPO_ORDENACAO_DESC);

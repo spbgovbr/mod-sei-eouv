@@ -4,18 +4,19 @@
 - SEI 3.0.0 instalado/atualizado ou versão superior (verificar valor da constante de versão do SEI no arquivo /sei/web/SEI.php).
 
 - Utilizar o Sistema de Ouvidorias do Governo Federal e-Ouv(sistema.ouvidorias.gov.br). Caso ainda não tenha aderido ao e-Ouv e queira saber mais informações acesse www.ouvidorias.gov.br.
-		
+
 - Antes de executar os scripts de instalação/atualização (itens 4 e 5 abaixo), o usuário de acesso aos bancos de dados do SEI e do SIP, constante nos arquivos ConfiguracaoSEI.php e ConfiguracaoSip.php, deverá ter permissão de acesso total ao banco de dados, permitindo, por exemplo, criação e exclusão de tabelas.
+
+	O item abaixo não é mais necessário a partir da versão 3.0.0.
 
 - Instalar na pasta infra/infra_php a biblioteca nusoap. Como o sistema e-Ouv utiliza versionamento de WebServices a biblioteca padrão do SEI para consumir webservices não consegue resolver essa questão. A mesma pode ser baixada em: https://sourceforge.net/projects/nusoap/files/?source=navbar
 	- Após a instalação é necessário fazer uma correção na biblioteca conforme abaixo:
-	
-	
 
-> 
+
+>
 	alterar o arquivo nusoap.php na linha 4694
-		de:$this->schemas[$ns]->imports[$ns2][$ii]['loaded'] = true; 
-		para:$this->schemas[$ns][$ns2]->imports[$ns2][$ii]['loaded'] = true; 
+		de:$this->schemas[$ns]->imports[$ns2][$ii]['loaded'] = true;
+		para:$this->schemas[$ns][$ns2]->imports[$ns2][$ii]['loaded'] = true;
 
 
 ## Procedimentos para Instalação:
@@ -55,11 +56,17 @@ Criamos um vídeo com a demonstração do funcionamento do módulo focado na par
 
 https://www.youtube.com/watch?v=geUCx7H79Gw
 
-1. Imediatamente após a instalação com sucesso, com usuário com permissão de "Administrador" do SEI, é necessário realizar as parametrizações do módulo no menu Infra > Parâmetros alterando os seguintes Parâmetros:
+1. Imediatamente após a instalação com sucesso, com usuário com permissão de "Administrador" do SEI, é necessário realizar as parametrizações do módulo. Siga abaixo o roteiro de acordo com a versão desejada:
+
+**Versão 2.0.5 ou anterior:**
+
+No menu Infra > Parâmetros alterando os seguintes Parâmetros:
 
 - EOUV_DATA_INICIAL_IMPORTACAO_MANIFESTACOES: Colocar a Data Inicial no formato (DD/MM/AAAA) para carregar as manifestações do e-Ouv. Sugerimos que seja colocada a data atual para que apenas as novas manifestações sejam importadas para o SEI.
 
 - EOUV_ID_SERIE_DOCUMENTO_EXTERNO_DADOS_MANIFESTACAO: Quando a rotina for executada ela criará um documento PDF com os dados da Manifestação do EOUV que será anexada ao processo. Esse parâmetro será usado para dizer qual o Tipo de Documento será usado para criar esse documento. Lembrando que deve ser do Grupo de Documentos Externos. Para verificar os tipos existentes acesse Administração > Tipos de Documento > Listar.
+
+- ID_SERIE_EXTERNO_OUVIDORIA: Quando a rotina importar um documento da Manifestação no Eouv usará esse código para inserir no campo Tipo Docuemnto. Para verificar os tipos existentes acesse Administração > Tipos de Documento > Listar.
 
 - EOUV_USUARIO_ACESSO_WEBSERVICE: Nome de usuário para acesso aos WebServices do e-Ouv.
 Este nome de usuário é gerado para cada órgão especificamente para consumir os Webservices do e-Ouv.
@@ -75,11 +82,41 @@ Obs: Para efeitos de testes e homologação utilizar o ambiente de treinamento: 
 
 - ID_UNIDADE_OUVIDORIA: Código da Unidade que deverá registrar os novos processos. Ao importar os processos do e-Ouv para o SEI essa será a unidade que receberá os Processos no SEI.
 
+**A partir da versão 3.0.0:**
+
+No menu *E-Ouv > Parâmetros do Módulo E-ouv* alterando os seguintes Parâmetros:
+
+- EOUV_DATA_INICIAL_IMPORTACAO_MANIFESTACOES: Colocar a Data Inicial no formato (DD/MM/AAAA) para carregar as manifestações do e-Ouv. Sugerimos que seja colocada a data atual para que apenas as novas manifestações sejam importadas para o SEI.
+
+- EOUV_ID_SERIE_DOCUMENTO_EXTERNO_DADOS_MANIFESTACAO: Quando a rotina for executada ela criará um documento PDF com os dados da Manifestação do EOUV que será anexada ao processo. Esse parâmetro será usado para dizer qual o Tipo de Documento será usado para criar esse documento. Lembrando que deve ser do Grupo de Documentos Externos. Para verificar os tipos existentes acesse Administração > Tipos de Documento > Listar.
+
+- ID_SERIE_EXTERNO_OUVIDORIA: Quando a rotina importar um documento da Manifestação no Eouv usará esse código para inserir no campo Tipo Docuemnto. Para verificar os tipos existentes acesse Administração > Tipos de Documento > Listar.
+
+O conjunto de informações em destaque abaixo será fornecido pela CGU:
+
+> - EOUV_USUARIO_ACESSO_WEBSERVICE: Nome de usuário para acesso aos WebServices do e-Ouv. Este nome de usuário é gerado para cada órgão
+> especificamente para consumir os Webservices do e-Ouv. Caso ainda não
+> possua esse usuário e a senha abaixo entrar em contato através do
+> e-mail abaixo solicitando o mesmo: marcos.silva@cgu.gov.br
+>
+> - EOUV_SENHA_ACESSO_WEBSERVICE: Senha do usuário para acesso aos WebServices do e-Ouv.
+>
+> - CLIENT_ID: Id gerado para acesso aos WebServices.
+>
+> - CLIENT_SECRET: Senha gerada para acesso aos WebServices.
+>
+> - TOKEN: Token gerado para acesso aos WebServices.
+
+- EOUV_URL_WEBSERVICE_IMPORTACAO_MANIFESTACAO: Já vem configurado para o ambiente de produção do e-Ouv com https://sistema.ouvidorias.gov.br/api/manifestacoes
+Obs: Para efeitos de testes e homologação utilizar o ambiente de treinamento: https://treinamentoouvidorias.cgu.gov.br/api/manifestacoes
+
+- ID_UNIDADE_OUVIDORIA: Código da Unidade que deverá registrar os novos processos. Ao importar os processos do e-Ouv para o SEI essa será a unidade que receberá os Processos no SEI.
+
 2. Foi criado um novo Agendamento de Tarefa com o nome "MdCguEouvAgendamentoRN :: executarImportacaoManifestacaoEOuv". O mesmo é configurado por padrão para ser executado apenas uma vez por dia e deverá ser configurado conforme desejado pelo órgão. Os agendamentos podem ser acessados em Infra > Agendamentos.
 
 3. Foi criado um menu com o nome E-Ouv que possui um relatório das execuções de Importação executadas. A cada execução do agendamento é gerado um registro que contém os detalhes da execução informando se houve sucesso e os Protocolos que foram importados.
 
-4. Foi criada uma tabela com o nome md_cgu_eouv_depara_importacao que serve para dizer para a rotina qual o Tipo de Processo será cadastrado para cada tipo de Manifestação do e-Ouv. Seguindo a tabela abaixo informe qual o código do tipo de processo(Administração > Tipos de Processo) para cada equivalente. 
+4. Foi criada uma tabela com o nome md_cgu_eouv_depara_importacao que serve para dizer para a rotina qual o Tipo de Processo será cadastrado para cada tipo de Manifestação do e-Ouv. Seguindo a tabela abaixo informe qual o código do tipo de processo(Administração > Tipos de Processo) para cada equivalente.
 
 |id_tipo_manifestacao_eouv |id_tipo_procecimento    |de_tipo_manifestacao_eouv |
 |--------------------------|------------------------|--------------------------|
@@ -89,11 +126,5 @@ Obs: Para efeitos de testes e homologação utilizar o ambiente de treinamento: 
 |4                         |`xxx`                   |Sugestão                  |
 |5                         |`xxx`                   |Solicitação               |
 |6                         |`xxx`                   |Simplifique               |
-
-## Atualização da versão 2.0.5
-
-Caso você já tenha o módulo instalado e esteja apenas realizando a atualização do módulo para a versão 2.0.5 é necessário adicionar os seguintes itens ao SIP
-
-1. Adicionar o recurso md_cgu_eouv_relatorio_importacao_excluir com o link: controlador.php?acao=md_cgu_eouv_relatorio_importacao_excluir
-2. Adicionar esse novo recurso ao perfil de Administrador do módulo.
+|7                         |`xxx`                   |Comunicado                |
 
