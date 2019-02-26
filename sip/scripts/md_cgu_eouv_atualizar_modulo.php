@@ -99,7 +99,7 @@ class MdCguEouvAtualizadorSipRN extends InfraRN{
 
             $objInfraParametro = new InfraParametro(BancoSip::getInstance());
 
-            $strVersaoModuloEOuv = $objInfraParametro->getValor($this->nomeParametroModulo, false);
+            $strVersaoModuloEOuv = $objInfraParametro->getValor($this->nomeParametroVersaoModulo, false);
 
             //VERIFICANDO QUAL VERSAO DEVE SER INSTALADA NESTA EXECUCAO
             //se nao tem nenhuma versao instalada, instalar todas
