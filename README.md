@@ -35,13 +35,15 @@
 			'Modulos' => array('MdCguEouvIntegracao' => 'cgu/mod-sei-eouv',)
 			),
 
-4. Rodar o script de banco "/sei/scripts/md_cgu_eouv_atualizar_modulo.php" em linha de comando no servidor do SEI, verificando se não houve erro em sua execução, em que ao final do log deverá ser informado "FIM". Exemplo de comando de execução:
+
+4. Rodar o script de banco "/sip/scripts/md_cgu_eouv_atualizar_modulo.php" em linha de comando no servidor do SIP, verificando se não houve erro em sua execução, em que ao final do log deverá ser informado "FIM". Exemplo de comando de execução:
+
+		/usr/bin/php -c /etc/php.ini /opt/sip/scripts/md_cgu_eouv_atualizar_modulo.php > md_cgu_eouv_atualizar_modulo-1.log
+
+5. Rodar o script de banco "/sei/scripts/md_cgu_eouv_atualizar_modulo.php" em linha de comando no servidor do SEI, verificando se não houve erro em sua execução, em que ao final do log deverá ser informado "FIM". Exemplo de comando de execução:
 
 		/usr/bin/php -c /etc/php.ini /opt/sei/scripts/md_cgu_eouv_atualizar_modulo.php > md_cgu_eouv_atualizar_modulo_1.log
 
-5. Rodar o script de banco "/sip/scripts/md_cgu_eouv_atualizar_modulo.php" em linha de comando no servidor do SIP, verificando se não houve erro em sua execução, em que ao final do log deverá ser informado "FIM". Exemplo de comando de execução:
-
-		/usr/bin/php -c /etc/php.ini /opt/sip/scripts/md_cgu_eouv_atualizar_modulo.php > md_cgu_eouv_atualizar_modulo-1.log
 
 6. Após a execução com sucesso, com um usuário com permissão de Administrador no SEI, seguir os passos dispostos no tópico Orientações Negociais, abaixo.
 
