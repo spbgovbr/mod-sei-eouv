@@ -322,7 +322,7 @@ class MdCguEouvAtualizadorBDRN extends InfraRN
         BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_parametros (id_parametro, no_parametro, de_valor_parametro) VALUES (\'8\', \'EOUV_URL_WEBSERVICE_IMPORTACAO_MANIFESTACAO\', \'https://treinamentoouvidorias.cgu.gov.br/api/manifestacoes\')');
         BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_parametros (id_parametro, no_parametro, de_valor_parametro) VALUES (\'9\', \'ID_UNIDADE_OUVIDORIA\', \'110000001\')');
         BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_parametros (id_parametro, no_parametro, de_valor_parametro) VALUES (\'10\', \'TOKEN\', \'XXX\')');
-        BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_parametros (id_parametro, no_parametro, de_valor_parametro) VALUES (\'10\', \'IMPORTAR_DADOS_MANIFESTANTE\', \'1\')');
+        BancoSEI::getInstance()->executarSql('INSERT INTO md_eouv_parametros (id_parametro, no_parametro, de_valor_parametro) VALUES (\'11\', \'IMPORTAR_DADOS_MANIFESTANTE\', \'1\')');
 
         $this->logar('APAGANDO OS REGISTROS DA TABELA INFRA_PARAMETROS USADOS NA VERSÃO 2.0.5 E QUE AGORA NÃO SÃO MAIS NECESSÁRIOS');
 
