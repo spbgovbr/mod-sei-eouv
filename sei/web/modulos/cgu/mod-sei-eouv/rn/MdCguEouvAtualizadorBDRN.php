@@ -209,7 +209,7 @@ class MdCguEouvAtualizadorBDRN extends InfraRN
         $objInfraParametro->setValor('ID_UNIDADE_OUVIDORIA', '110000001');
         $objInfraParametro->setValor('ID_SERIE_EXTERNO_OUVIDORIA', '92');
         $objInfraParametro->setValor('EOUV_ID_SERIE_DOCUMENTO_EXTERNO_DADOS_MANIFESTACAO', '63');
-        $objInfraParametro->setValor('EOUV_DATA_INICIAL_IMPORTACAO_MANIFESTACOES ', '01/12/2015');
+        $objInfraParametro->setValor('EOUV_DATA_INICIAL_IMPORTACAO_MANIFESTACOES', '01/12/2015');
         $objInfraParametro->setValor('EOUV_URL_DETALHE_MANIFESTACAO', '');
         $objInfraParametro->setValor('EOUV_USUARIO_ACESSO_WEBSERVICE', '');
         $objInfraParametro->setValor('EOUV_SENHA_ACESSO_WEBSERVICE', '');
@@ -332,7 +332,7 @@ class MdCguEouvAtualizadorBDRN extends InfraRN
             'ID_UNIDADE_OUVIDORIA',
             'ID_SERIE_EXTERNO_OUVIDORIA',
             'EOUV_ID_SERIE_DOCUMENTO_EXTERNO_DADOS_MANIFESTACAO',
-            'EOUV_DATA_INICIAL_IMPORTACAO_MANIFESTACOES ',
+            'EOUV_DATA_INICIAL_IMPORTACAO_MANIFESTACOES',
             'EOUV_URL_DETALHE_MANIFESTACAO',
             'EOUV_USUARIO_ACESSO_WEBSERVICE',
             'EOUV_SENHA_ACESSO_WEBSERVICE'
