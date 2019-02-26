@@ -203,7 +203,12 @@ class MdCguEouvAtualizadorSipRN extends InfraRN{
         $this->adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador,
             $numIdMenuSei, $menuEouv->getNumIdItemMenu(),
             $numIdRecursoRelatorioImportacaoEouvSei, 'Importação de Manifestação', 'Relatório de Importação de Manifestação', 10);
+
+        $this->logar('ADICIONANDO PARÂMETRO '.$this->nomeParametroVersaoModulo.' NA TABELA infra_parametro PARA CONTROLAR A VERSÃO DO MÓDULO');
+        BancoSip::getInstance()->executarSql('INSERT INTO infra_parametro (valor, nome ) VALUES( \'2.0.5\',  \''. $this->nomeParametroVersaoModulo .'\' )');
+
     }
+
 
     protected function instalarv300()
     {
@@ -285,6 +290,10 @@ class MdCguEouvAtualizadorSipRN extends InfraRN{
         $this->adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador,
             $numIdMenuSei, $objItemMenuDTOEouv->getNumIdItemMenu(),
             $numIdRecursoParametro, 'Parâmetros do Módulo E-ouv', 'Parâmetros', 20);
+
+
+        $this->logar('ATUALIZANDO PARÂMETRO '.$this->nomeParametroVersaoModulo.' NA TABELA infra_parametro PARA CONTROLAR A VERSÃO DO MÓDULO');
+        BancoSip::getInstance()->executarSql('UPDATE infra_parametro SET valor = \'3.0.0\' WHERE nome = \''. $this->nomeParametroVersaoModulo .'\' ' );
 
     }
 
