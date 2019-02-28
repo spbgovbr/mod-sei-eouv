@@ -1,6 +1,6 @@
 <?
 /**
- * CONTROLADORIA GERAL DA UNIÃO - CGU
+ * CONTROLADORIA GERAL DA UNIÃƒO - CGU
  *
  * 09/10/2015 - criado por Rafael Leandro
  *
@@ -56,7 +56,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $soapError = $objWS->getError();
 
         if (!empty($soapError)) {
-            //print_r('<br/><br/>Erro Serviço');
+            //print_r('<br/><br/>Erro ServiÃ§o');
             //print_r($soapError);
             $errorMessage = 'SOAP method invocation failed: ' . $soapError;
             throw new Exception($errorMessage);
@@ -69,17 +69,17 @@ class MdCguEouvAgendamentoRN extends InfraRN
 
         //Verifica se ocorreram erros;
         if (empty($retornoWs['GetListaManifestacaoOuvidoriaResult'])) {
-            throw new Exception("Erro ao executar serviço: " . print_r($retornoWs, true));
+            throw new Exception("Erro ao executar serviÃ§o: " . print_r($retornoWs, true));
         }
 
         $intIdCodigoErroExecucao = $retornoWs['GetListaManifestacaoOuvidoriaResult']['CodigoErro'];
 
         if ($intIdCodigoErroExecucao > 0) {
 
-            //Faz tratamento diferenciado para consulta por Protocolo específico
+            //Faz tratamento diferenciado para consulta por Protocolo especÃ­fico
             if(!is_null($numprotocolo)){
-                //Se for erro de permissão para um protocolo específico segue o fluxo, caso contrário para a execução
-                if ((strpos($retornoWs['GetListaManifestacaoOuvidoriaResult']['DescricaoErro'], 'Usuário Sem Acesso a essa Manifestação') !== false) == false) {
+                //Se for erro de permissÃ£o para um protocolo especÃ­fico segue o fluxo, caso contrÃ¡rio para a execuÃ§Ã£o
+                if ((strpos($retornoWs['GetListaManifestacaoOuvidoriaResult']['DescricaoErro'], 'UsuÃ¡rio Sem Acesso a essa ManifestaÃ§Ã£o') !== false) == false) {
                     throw new Exception($retornoWs['GetListaManifestacaoOuvidoriaResult']['DescricaoErro']);
                 }
                 else{
@@ -92,7 +92,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
 
                 $objEouvRelatorioImportacaoRN2 = new MdCguEouvRelatorioImportacaoRN();
 
-                //Grava a execução com sucesso se tiver corrido tudo bem
+                //Grava a execuÃ§Ã£o com sucesso se tiver corrido tudo bem
                 $objEouvRelatorioImportacaoDTO4 = new MdCguEouvRelatorioImportacaoDTO();
 
                 $objEouvRelatorioImportacaoDTO4->setNumIdRelatorioImportacao($numIdRelatorio);
@@ -120,8 +120,8 @@ class MdCguEouvAgendamentoRN extends InfraRN
     public function verificaRetornoWS($retornoWsLista)
     {
         /*
-        função criada para tratar o retorno de dados do WS, pois quando existe apenas um unico resultado retorna um objeto e
-        quando tem mais de um resultado retorna um array ocasionando falhas na exibição dos dados.
+        funÃ§Ã£o criada para tratar o retorno de dados do WS, pois quando existe apenas um unico resultado retorna um objeto e
+        quando tem mais de um resultado retorna um array ocasionando falhas na exibiÃ§Ã£o dos dados.
         */
         if (isset($retornoWsLista) and key_exists(0, $retornoWsLista)) {
             $resultado = $retornoWsLista;
@@ -204,7 +204,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
 
             $numProtocolo = preg_replace("/[^0-9]/", "", $erro->getStrProtocoloFormatado());
 
-            //Se já estiver na lista não faz novamente para determinado protocolo
+            //Se jÃ¡ estiver na lista nÃ£o faz novamente para determinado protocolo
             if (!in_array($numProtocolo, $arrProtocolos)){
 
                 //Adiciona no array de Protocolos
@@ -212,7 +212,8 @@ class MdCguEouvAgendamentoRN extends InfraRN
 
                 $retornoWsErro = $this->executarServicoConsultaManifestacoes($objWS, $usuarioWebService, $senhaUsuarioWebService, null, $dataAtualFormatoEOuv, $numProtocolo, $numIdRelatorio);
 
-                if (!is_null($retornoWsErro)){
+                if (!is_null($retornoWsErro) && is_array($retornoWsErro['GetListaManifestacaoOuvidoriaResult']['ManifestacoesOuvidoria']) && array_key_exists('ManifestacaoOuvidoria', $retornoWsErro['GetListaManifestacaoOuvidoriaResult']['ManifestacoesOuvidoria'])) 
+                {
                     $arrRetornoWs = $this->verificaRetornoWS($retornoWsErro['GetListaManifestacaoOuvidoriaResult']['ManifestacoesOuvidoria']['ManifestacaoOuvidoria']);
                     $arrResult = array_merge($arrResult, $arrRetornoWs);
                 }
@@ -225,7 +226,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
     public function validarEnderecoWebService($urlWebService){
 
         if (!@file_get_contents($urlWebService)) {
-            throw new InfraException('Arquivo WSDL ' . $urlWebService . ' não encontrado.');
+            throw new InfraException('Arquivo WSDL ' . $urlWebService . ' nÃ£o encontrado.');
         }
 
     }
@@ -245,7 +246,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
             $objWSTemp->response_timeout = 240;
 
         } catch (Exception $e) {
-            throw new InfraException('Erro acessando serviço.', $e);
+            throw new InfraException('Erro acessando serviÃ§o.', $e);
         }
 
         return $objWSTemp;
@@ -262,7 +263,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $objUsuarioDTO = $objUsuarioRN->consultarRN0489($objUsuarioDTO);
 
         if ($objUsuarioDTO==null){
-            throw new InfraException('Sistema ['.$SiglaSistema.'] não encontrado.');
+            throw new InfraException('Sistema ['.$SiglaSistema.'] nÃ£o encontrado.');
         }
 
         $objServicoDTO = new ServicoDTO();
@@ -280,7 +281,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $objServicoDTO = $objServicoRN->consultar($objServicoDTO);
 
         if ($objServicoDTO==null){
-            throw new InfraException('Serviço ['.$IdentificacaoServico.'] do sistema ['.$SiglaSistema.'] não encontrado.');
+            throw new InfraException('ServiÃ§o ['.$IdentificacaoServico.'] do sistema ['.$SiglaSistema.'] nÃ£o encontrado.');
         }
 
         return $objServicoDTO;
@@ -304,7 +305,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
 
         if ($objUnidadeDTO==null){
-            throw new InfraException('Unidade ['.$IdUnidade.'] não encontrada.');
+            throw new InfraException('Unidade ['.$IdUnidade.'] nÃ£o encontrada.');
         }
 
         return $objUnidadeDTO;
@@ -334,7 +335,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
         InfraDebug::getInstance()->setBolEcho(false);
         InfraDebug::getInstance()->limpar();
 
-        LogSEI::getInstance()->gravar('Rotina de Importação de Manifestações do E-Ouv', InfraLog::$INFORMACAO);
+        LogSEI::getInstance()->gravar('Rotina de ImportaÃ§Ã£o de ManifestaÃ§Ãµes do E-Ouv', InfraLog::$INFORMACAO);
 
         global $objEouvRelatorioImportacaoDTO,
                $objEouvRelatorioImportacaoRN,
@@ -399,14 +400,14 @@ class MdCguEouvAgendamentoRN extends InfraRN
 
         try {
 
-            //Retorna dados da última execução com Sucesso
+            //Retorna dados da Ãºltima execuÃ§Ã£o com Sucesso
             $objUltimaExecucao = MdCguEouvAgendamentoINT::retornarUltimaExecucaoSucesso();
 
             if ($objUltimaExecucao != null) {
                 //WebService Eouv trabalha com Data no formato AAAA-MM-DD HH:MM:SS
                 $ultimaDataExecucao = $objUltimaExecucao->getDthDthImportacao();
                 $idUltimaExecucao = $objUltimaExecucao->getNumIdRelatorioImportacao();
-            } //Primeira execução ou nenhuma executada com sucesso
+            } //Primeira execuÃ§Ã£o ou nenhuma executada com sucesso
             else {
                 $ultimaDataExecucao = $objInfraParametro->getValor('EOUV_DATA_INICIAL_IMPORTACAO_MANIFESTACOES');
             }
@@ -443,13 +444,13 @@ class MdCguEouvAgendamentoRN extends InfraRN
                 }
             }
 
-            $textoMensagemFinal = 'Execução Finalizada com Sucesso!';
+            $textoMensagemFinal = 'ExecuÃ§Ã£o Finalizada com Sucesso!';
 
             if ($ocorreuErroEmProtocolo){
-                $textoMensagemFinal = $textoMensagemFinal . ' Porém ocorreram erros em 1 ou mais protocolos.';
+                $textoMensagemFinal = $textoMensagemFinal . ' PorÃ©m ocorreram erros em 1 ou mais protocolos.';
             }
 
-            //Grava a execução com sucesso se tiver corrido tudo bem
+            //Grava a execuÃ§Ã£o com sucesso se tiver corrido tudo bem
             $objEouvRelatorioImportacaoDTO2 = new MdCguEouvRelatorioImportacaoDTO();
 
             $objEouvRelatorioImportacaoDTO2->setNumIdRelatorioImportacao($objEouvRelatorioImportacaoDTO->getNumIdRelatorioImportacao());
@@ -501,14 +502,14 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $dataRegistro = $retornoWsLinha['DataCadastro'];
         $numProtocoloFormatado =  $retornoWsLinha['NumProtocolo'];
 
-        //Limpa os registros de detalhe de importação com erro para este nup. Caso ocorra um novo, será criado
+        //Limpa os registros de detalhe de importaÃ§Ã£o com erro para este nup. Caso ocorra um novo, serÃ¡ criado
         // novo registro de erro para o NUP no tratamento desta function.
         $this->limparErrosParaNup($numProtocoloFormatado);
 
         if (!isset($retornoWsLinha['IdTipoManifestacao'])) {
             print_r("Numero Protocolo Formatado:" . $numProtocoloFormatado);
             print_r($retornoWsLinha);
-            $this->gravarLogLinha($numProtocoloFormatado, $idRelatorioImportacao, 'Tipo de processo não foi informado.', 'N');
+            $this->gravarLogLinha($numProtocoloFormatado, $idRelatorioImportacao, 'Tipo de processo nÃ£o foi informado.', 'N');
         } else {
 
             $objEouvDeparaImportacaoDTO = new MdCguEouvDeparaImportacaoDTO();
@@ -522,7 +523,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
             if (!$objEouvDeparaImportacaoDTO == null) {
                 $retornoWsLinha['IdTipoManifestacao'] = $objEouvDeparaImportacaoDTO->getNumIdTipoProcedimento();
             } else {
-                $this->gravarLogLinha($numProtocoloFormatado, $objEouvRelatorioImportacaoDTO->getNumIdRelatorioImportacao(), 'Não existe mapeamento DePara do Tipo de Manifestação do E-Ouv para o tipo de procedimento do SEI.', 'N');
+                $this->gravarLogLinha($numProtocoloFormatado, $objEouvRelatorioImportacaoDTO->getNumIdRelatorioImportacao(), 'NÃ£o existe mapeamento DePara do Tipo de ManifestaÃ§Ã£o do E-Ouv para o tipo de procedimento do SEI.', 'N');
                 //continue;
             }
         }
@@ -544,7 +545,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
             $objTipoProcedimentoDTO = $objTipoProcedimentoRN->consultarRN0267($objTipoProcedimentoDTO);
 
             if ($objTipoProcedimentoDTO == null) {
-                throw new Exception('Tipo de processo não encontrado: ' . $retornoWsLinha['IdTipoManifestacao']);
+                throw new Exception('Tipo de processo nÃ£o encontrado: ' . $retornoWsLinha['IdTipoManifestacao']);
             }
 
             $objProcedimentoAPI = new ProcedimentoAPI();
@@ -565,7 +566,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
 
             $arrDocumentos = $this->gerarAnexosProtocolo($numProtocoloFormatado);
             $documentoManifestacao =  $this->gerarPDFPedidoInicial($retornoWsLinha);
-            LogSEI::getInstance()->gravar('Importação de Manifestação ' . $numProtocoloFormatado . ': total de  Anexos configurados: ' . count($arrDocumentos), InfraLog::$INFORMACAO);
+            LogSEI::getInstance()->gravar('ImportaÃ§Ã£o de ManifestaÃ§Ã£o ' . $numProtocoloFormatado . ': total de  Anexos configurados: ' . count($arrDocumentos), InfraLog::$INFORMACAO);
 
             array_push($arrDocumentos, $documentoManifestacao);
 
@@ -582,7 +583,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
             }
             //print_r($e);
             //throw new InfraException('Erro gerando Processo.',$e);
-            $this->gravarLogLinha($numProtocoloFormatado, $idRelatorioImportacao, 'Erro na gravação: ' . $e, 'N');
+            $this->gravarLogLinha($numProtocoloFormatado, $idRelatorioImportacao, 'Erro na gravaÃ§Ã£o: ' . $e, 'N');
         }
     }
 
@@ -615,9 +616,9 @@ class MdCguEouvAgendamentoRN extends InfraRN
                $urlEouvDetalhesManifestacao;
 
         /***********************************************************************************************
-         * //DADOS INICIAIS DA MANIFESTAÇÃO
-         * Primeiro é gerado o PDF com todas as informações referentes a Manifestação, e mais abaixo
-         * é incluído como um anexo do novo Processo Gerado
+         * //DADOS INICIAIS DA MANIFESTAÃ‡ÃƒO
+         * Primeiro Ã© gerado o PDF com todas as informaÃ§Ãµes referentes a ManifestaÃ§Ã£o, e mais abaixo
+         * Ã© incluÃ­do como um anexo do novo Processo Gerado
          * **********************************************************************************************/
         $nup = $retornoWsLinha['NumProtocolo'];
         $dt_cadastro = $retornoWsLinha['DataCadastro'];
@@ -686,7 +687,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
         //$pdf->Image('logog8.jpg');
 
         $pdf->SetFont('arial', 'B', 18);
-        $pdf->Cell(0, 5, "Dados da Manifestação", 0, 1, 'C');
+        $pdf->Cell(0, 5, "Dados da ManifestaÃ§Ã£o", 0, 1, 'C');
         $pdf->Cell(0, 5, "", "B", 1, 'C');
         $pdf->Ln(20);
 
@@ -694,7 +695,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
         //1. Dados INICIAIS
         //***********************************************************************************************
         $pdf->SetFont('arial', 'B', 14);
-        $pdf->Cell(0, 20, "1. Dados Iniciais da Manifestação", 0, 0, 'L');
+        $pdf->Cell(0, 20, "1. Dados Iniciais da ManifestaÃ§Ã£o", 0, 0, 'L');
         $pdf->Ln(20);
 
         //NUP
@@ -715,15 +716,15 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $pdf->setFont('arial', '', 12);
         $pdf->Cell(0, 20, $id_assunto . " - " . $desc_assunto . " / " . $id_sub_assunto . " - " . $desc_sub_assunto, 0, 1, 'L');
 
-        //Tipo de Manifestação
+        //Tipo de ManifestaÃ§Ã£o
         $pdf->SetFont('arial', 'B', 12);
-        $pdf->Cell(150, 20, "Tipo da Manifestação:", 0, 0, 'L');
+        $pdf->Cell(150, 20, "Tipo da ManifestaÃ§Ã£o:", 0, 0, 'L');
         $pdf->setFont('arial', '', 12);
         $pdf->Cell(0, 20, $id_tipo_manifestacao . " - " . $desc_tipo_manifestacao, 0, 1, 'L');
 
         //EnvolveDas4OuSuperior
         $pdf->SetFont('arial', 'B', 12);
-        $pdf->Cell(450, 20, "Denúncia Envolvendo Ocupante de Cargo Comissionado DAS4 ou Superior?:", 0, 0, 'L');
+        $pdf->Cell(450, 20, "DenÃºncia Envolvendo Ocupante de Cargo Comissionado DAS4 ou Superior?:", 0, 0, 'L');
         $pdf->setFont('arial', '', 12);
         $pdf->Cell(20, 20, $envolve_das4_superior, 0, 1, 'L');
 
@@ -733,9 +734,9 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $pdf->setFont('arial', '', 12);
         $pdf->Cell(70, 20, $dt_prazo_atendimento, 0, 1, 'L');
 
-        //Nome do Órgão
+        //Nome do Ã“rgÃ£o
         $pdf->SetFont('arial', 'B', 12);
-        $pdf->Cell(150, 20, "Nome do Órgão:", 0, 0, 'L');
+        $pdf->Cell(150, 20, "Nome do Ã“rgÃ£o:", 0, 0, 'L');
         $pdf->setFont('arial', '', 12);
         $pdf->Cell(70, 20, $nome_orgao, 0, 1, 'L');
 
@@ -753,15 +754,15 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $pdf->setFont('arial', '', 12);
         $pdf->Cell(70, 20, $nome, 0, 1, 'L');
 
-        //Faixa Etária
+        //Faixa EtÃ¡ria
         $pdf->SetFont('arial', 'B', 12);
-        $pdf->Cell(150, 20, "Faixa Etária:", 0, 0, 'L');
+        $pdf->Cell(150, 20, "Faixa EtÃ¡ria:", 0, 0, 'L');
         $pdf->setFont('arial', '', 12);
         $pdf->Cell(70, 20, $id_faixa_etaria . " - " . $desc_faixa_etaria, 0, 1, 'L');
 
-        //Raça Cor
+        //RaÃ§a Cor
         $pdf->SetFont('arial', 'B', 12);
-        $pdf->Cell(150, 20, "Raça/Cor:", 0, 0, 'L');
+        $pdf->Cell(150, 20, "RaÃ§a/Cor:", 0, 0, 'L');
         $pdf->setFont('arial', '', 12);
         $pdf->Cell(70, 20, $id_raca_cor . " - " . $desc_raca_cor, 0, 1, 'L');
 
@@ -771,22 +772,22 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $pdf->setFont('arial', '', 12);
         $pdf->Cell(70, 20, $sexo, 0, 1, 'L');
 
-        //Documento Identificação
+        //Documento IdentificaÃ§Ã£o
         $pdf->SetFont('arial', 'B', 12);
-        $pdf->Cell(170, 20, "Documento de Identificação:", 0, 0, 'L');
+        $pdf->Cell(170, 20, "Documento de IdentificaÃ§Ã£o:", 0, 0, 'L');
         $pdf->setFont('arial', '', 12);
         $pdf->Cell(70, 20, $id_documento_identificacao . " - " . $desc_documento_identificacao, 0, 1, 'L');
 
-        //Número do Documento Identificação
+        //NÃºmero do Documento IdentificaÃ§Ã£o
         $pdf->SetFont('arial', 'B', 12);
-        $pdf->Cell(150, 20, "Número do Documento:", 0, 0, 'L');
+        $pdf->Cell(150, 20, "NÃºmero do Documento:", 0, 0, 'L');
         $pdf->setFont('arial', '', 12);
         $pdf->Cell(70, 20, $numero_documento_identificacao, 0, 1, 'L');
 
         $pdf->ln(4);
-        //Endereço
+        //EndereÃ§o
         $pdf->SetFont('arial', 'B', 12);
-        $pdf->Cell(70, 20, "Endereço:", 0, 1, 'L');
+        $pdf->Cell(70, 20, "EndereÃ§o:", 0, 1, 'L');
         $pdf->setFont('arial', '', 12);
         $pdf->Cell(70, 20, $endereco, 0, 1, 'L');
         $pdf->Cell(70, 20, $bairro, 0, 1, 'L');
@@ -810,22 +811,22 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $pdf->Cell(70, 20, $email, 0, 1, 'L');
 
         //***********************************************************************************************
-        //3. Dados do Fato da Manifestação
+        //3. Dados do Fato da ManifestaÃ§Ã£o
         //***********************************************************************************************
         $pdf->Ln(20);
         $pdf->SetFont('arial', 'B', 14);
-        $pdf->Cell(70, 20, "3. Fato da Manifestação:", 0, 0, 'L');
+        $pdf->Cell(70, 20, "3. Fato da ManifestaÃ§Ã£o:", 0, 0, 'L');
         $pdf->Ln(20);
 
-        //Município/UF
+        //MunicÃ­pio/UF
         $pdf->SetFont('arial', 'B', 12);
-        $pdf->Cell(115, 20, "Município/UF:", 0, 0, 'L');
+        $pdf->Cell(115, 20, "MunicÃ­pio/UF:", 0, 0, 'L');
         $pdf->setFont('arial', '', 12);
         $pdf->Cell(70, 20, $id_municipio_fato . " - " . $desc_municipio_fato . " / " . $uf_fato, 0, 1, 'L');
 
-        //Descrição
+        //DescriÃ§Ã£o
         $pdf->SetFont('arial', 'B', 12);
-        $pdf->Cell(115, 20, "Descrição:", 0, 1, 'L');
+        $pdf->Cell(115, 20, "DescriÃ§Ã£o:", 0, 1, 'L');
         $pdf->setFont('arial', '', 12);
         $pdf->MultiCell(0, 20, $descricao_fato, 0, 'J');
 
@@ -835,11 +836,11 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $pdf->setFont('arial', '', 12);
 
         for ($x = 0; $x < count($envolvidos); $x++) {
-            $pdf->Cell(70, 20, "Função:", 0, 0, 'L');
+            $pdf->Cell(70, 20, "FunÃ§Ã£o:", 0, 0, 'L');
             $pdf->Cell(0, 20, $envolvidos[$x][0], 0, 1, 'L');
             $pdf->Cell(70, 20, "Nome:", 0, 0, 'L');
             $pdf->Cell(0, 20, $envolvidos[$x][1], 0, 1, 'L');
-            $pdf->Cell(70, 20, "Órgão:", 0, 0, 'L');
+            $pdf->Cell(70, 20, "Ã“rgÃ£o:", 0, 0, 'L');
             $pdf->Cell(0, 20, $envolvidos[$x][2], 0, 1, 'L');
             $pdf->Ln(10);
         }
@@ -862,11 +863,11 @@ class MdCguEouvAgendamentoRN extends InfraRN
         if($ocorreuErroAdicionarAnexo == true){
             $pdf->Ln(20);
             $pdf->SetFont('arial', 'B', 14);
-            $pdf->Cell(70, 20, "5. Observações:", 0, 0, 'L');
+            $pdf->Cell(70, 20, "5. ObservaÃ§Ãµes:", 0, 0, 'L');
             $pdf->Ln(20);
 
             $pdf->SetFont('arial', '', 12);
-            $pdf->MultiCell(0, 20, "Um ou mais anexos da manifestação não foram importados para o SEI devido a restrições da extensão do arquivo. Acesse o E-ouv para mais detalhes. ", 0, 'J');
+            $pdf->MultiCell(0, 20, "Um ou mais anexos da manifestaÃ§Ã£o nÃ£o foram importados para o SEI devido a restriÃ§Ãµes da extensÃ£o do arquivo. Acesse o E-ouv para mais detalhes. ", 0, 'J');
             //$pdf->Cell(0, 20, $urlEouvDetalhesManifestacao, 0, 1, 'L');
 
         }
@@ -877,14 +878,14 @@ class MdCguEouvAgendamentoRN extends InfraRN
 
         $pdf->Output(DIR_SEI_TEMP . "/" . $strNomeArquivoInicialUpload . ".pdf", "F");
 
-        //Renomeia tirando a extensão para o SEI trabalhar o Arquivo
+        //Renomeia tirando a extensÃ£o para o SEI trabalhar o Arquivo
         rename(DIR_SEI_TEMP . "/" . $strNomeArquivoInicialUpload . ".pdf", DIR_SEI_TEMP . "/" . $strNomeArquivoInicialUpload);
 
         $objDocumentoManifestacao = new DocumentoAPI();
         $objDocumentoManifestacao->setTipo('R');
         $objDocumentoManifestacao->setIdSerie($idTipoDocumentoAnexoDadosManifestacao);
         $objDocumentoManifestacao->setData($retornoWsLinha['DataCadastro']);
-        $objDocumentoManifestacao->setNomeArquivo('RelatórioDadosManifestação.pdf');
+        $objDocumentoManifestacao->setNomeArquivo('RelatÃ³rioDadosManifestaÃ§Ã£o.pdf');
         $objDocumentoManifestacao->setConteudo(base64_encode(file_get_contents(DIR_SEI_TEMP . "/" . $strNomeArquivoInicialUpload)));
         return $objDocumentoManifestacao;
 
@@ -907,7 +908,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
                $idRelatorioImportacao;
 
         /**********************************************************************************************************************************************
-         * Início da importação de anexos de cada protocolo
+         * InÃ­cio da importaÃ§Ã£o de anexos de cada protocolo
          * Desativado momentaneamente
          */
 
@@ -938,11 +939,11 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $intTotAnexos = $retornoWsAnexo['GetAnexosManifestacaoResult']['QtdAnexos'];
 
         if($intTotAnexos == 0){
-            //Não encontrou anexos..
+            //NÃ£o encontrou anexos..
             return $arrAnexos;
         }
 
-        //Trata as extensões permitidas
+        //Trata as extensÃµes permitidas
         $objArquivoExtensaoDTO = new ArquivoExtensaoDTO();
         $objArquivoExtensaoDTO->retNumIdArquivoExtensao();
         $objArquivoExtensaoDTO->retStrExtensao();
@@ -992,7 +993,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
                     else
                     {
                         $ocorreuErroAdicionarAnexo = true;
-                        LogSEI::getInstance()->gravar('Importação de Manifestação ' . $numProtocoloFormatado . ': Arquivo ' . $strNomeArquivoOriginal . ' possui extensão inválida.', InfraLog::$INFORMACAO);
+                        LogSEI::getInstance()->gravar('ImportaÃ§Ã£o de ManifestaÃ§Ã£o ' . $numProtocoloFormatado . ': Arquivo ' . $strNomeArquivoOriginal . ' possui extensÃ£o invÃ¡lida.', InfraLog::$INFORMACAO);
                         continue;
                     }
 
@@ -1004,7 +1005,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
             }
 
             if($ocorreuErroAdicionarAnexo==true){
-                $this->gravarLogLinha($numProtocoloFormatado, $idRelatorioImportacao, 'Um ou mais documentos anexos não foram importados corretamente: ' . $strMensagemErroAnexos, 'S', '');
+                $this->gravarLogLinha($numProtocoloFormatado, $idRelatorioImportacao, 'Um ou mais documentos anexos nÃ£o foram importados corretamente: ' . $strMensagemErroAnexos, 'S', '');
             }
 
             return $arrAnexos;
@@ -1020,7 +1021,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
             $objProcedimentoRN = new ProcedimentoRN();
             $objProcedimentoRN->excluirRN0280($objProcedimentoExcluirDTO);
             ProcedimentoINT::removerProcedimentoVisitado($idProcedimento);
-            //PaginaSEI::getInstance()->setStrMensagem('Exclusão realizada com sucesso.');
+            //PaginaSEI::getInstance()->setStrMensagem('ExclusÃ£o realizada com sucesso.');
             //$bolFlagProcessou = true;
 
         }catch(Exception $e){
