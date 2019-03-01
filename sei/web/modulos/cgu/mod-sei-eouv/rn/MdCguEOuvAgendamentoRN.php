@@ -68,7 +68,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
         curl_close($curl);
 
         //Se tiver retornado Token Invalidado apenas retorna a String
-        if (!strpos($response, 'Invalidado') !== false) {
+        if (strpos($response, 'Invalidado') !== false) {
             $response = json_decode($response, true);
         }
 
