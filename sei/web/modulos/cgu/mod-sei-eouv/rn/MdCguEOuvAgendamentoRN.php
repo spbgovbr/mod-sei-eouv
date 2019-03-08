@@ -74,7 +74,9 @@ class MdCguEouvAgendamentoRN extends InfraRN
 
         //array_walk_recursive($response, 'utf8_decode');
 
-        $response = $this->decode_result($response);
+        if (is_array($response)){
+            $response = $this->decode_result($response);
+        }
 
         return $response;
 
