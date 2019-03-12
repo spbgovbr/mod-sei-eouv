@@ -39,10 +39,10 @@ class MdCguEouvAgendamentoRN extends InfraRN
         */
         /*if ($tipo == 1) {
             echo "<BR>URL: " . $url;
-            echo "<BR>TOKEN: " . $token;
-            exit();
-        }*/
-
+            //echo "<BR>TOKEN: " . $token;
+            //exit();
+        }
+        */
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
@@ -62,20 +62,21 @@ class MdCguEouvAgendamentoRN extends InfraRN
         ));
 
         $response = curl_exec($curl);
-
+        $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         $err = curl_error($curl);
 
         curl_close($curl);
 
-        //Se tiver retornado Token Invalidado apenas retorna a String
-        if (strpos($response, 'Invalidado') !== false) {
-            $response = json_decode($response, true);
+        //Se tiver retornado Token Invalidado
+        if ($httpcode == 401) {
+            $response = "Token Invalidado. HTTP Status: " . $httpcode;
         }
-
-        //array_walk_recursive($response, 'utf8_decode');
-
-        if (is_array($response)){
+        elseif ($httpcode == 200) {
+            $response = json_decode($response, true);
             $response = $this->decode_result($response);
+        }
+        else{
+            $response = "Erro: Ocorreu algum erro não tratado. HTTP Status: " . $httpcode;
         }
 
         return $response;
@@ -172,47 +173,36 @@ class MdCguEouvAgendamentoRN extends InfraRN
 
         $retornoWs = $this->apiRestRequest($urlConsultaManifestacao, $token, 1);
 
-        //Verifica se retornou Token Invalido
-        if(is_string($retornoWs)){
-            if (strpos($retornoWs, 'Invalidado') !== false) {
-                //Token expirado, necessÃ¡rio gerar novo Token
-                return "Token Invalidado";
-            }
 
-        }
-        //if ($retornoWs )
-        //Verifica se ocorreram erros;
-        /*if (empty($retornoWs['GetListaManifestacaoOuvidoriaResult'])) {
-            throw new Exception("Erro ao executar serviÃ§o: " . print_r($retornoWs, true));
-        }*/
-
-        $intIdCodigoErroExecucao = 0; //$retornoWs['GetListaManifestacaoOuvidoriaResult']['CodigoErro'];
-
-        if ($intIdCodigoErroExecucao > 0) {
-
-            //Faz tratamento diferenciado para consulta por Protocolo específico
-            if(!is_null($numprotocolo)){
-                //Se for erro de permissão para um protocolo específico segue o fluxo, caso contrário para a execução
-                if ((strpos($retornoWs['GetListaManifestacaoOuvidoriaResult']['DescricaoErro'], 'Usuário Sem Acesso a essa Manifestação') !== false) == false) {
-                    throw new Exception($retornoWs['GetListaManifestacaoOuvidoriaResult']['DescricaoErro']);
+        if(is_null($numprotocolo)) {
+            //Verifica se retornou Token Invalido
+            if (is_string($retornoWs)) {
+                if (strpos($retornoWs, 'Invalidado') !== false) {
+                    //Token expirado, necessÃ¡rio gerar novo Token
+                    return "Token Invalidado";
                 }
-                else{
-                    $this->gravarLogLinha($this->formatarProcesso($numprotocolo),$numIdRelatorio,$retornoWs['GetListaManifestacaoOuvidoriaResult']['DescricaoErro'],'N');
+
+                //Outro erro
+                if (strpos($retornoWs, 'Erro') !== false) {
+                    //Token expirado, necessÃ¡rio gerar novo Token
+                    return "Erro:" . $retornoWs;
+                }
+
+            }
+        }
+
+        //Faz tratamento diferenciado para consulta por Protocolo específico
+        else{
+
+            if (strpos($retornoWs, 'Erro') !== false) {
+                if(strpos($retornoWs, '404') !== false){
+                    $this->gravarLogLinha($this->formatarProcesso($numprotocolo), $numIdRelatorio, "Usuário não possui permissão de acesso neste protocolo.", 'N');
                     $retornoWs = null;
                 }
-            }
-
-            else {
-
-                $objEouvRelatorioImportacaoRN2 = new MdCguEouvRelatorioImportacaoRN();
-
-                //Grava a execução com sucesso se tiver corrido tudo bem
-                $objEouvRelatorioImportacaoDTO4 = new MdCguEouvRelatorioImportacaoDTO();
-
-                $objEouvRelatorioImportacaoDTO4->setNumIdRelatorioImportacao($numIdRelatorio);
-                $objEouvRelatorioImportacaoDTO4->setStrSinSucesso('N');
-                $objEouvRelatorioImportacaoDTO4->setStrDeLogProcessamento($retornoWs['GetListaManifestacaoOuvidoriaResult']['DescricaoErro']);
-                $objEouvRelatorioImportacaoRN2->alterar($objEouvRelatorioImportacaoDTO4);
+                else{
+                    $this->gravarLogLinha($this->formatarProcesso($numprotocolo), $numIdRelatorio, "Erro desconhecido" . $retornoWs, 'N');
+                    throw new Exception($retornoWs);
+                }
             }
         }
 
@@ -547,7 +537,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
                     $objUnidadeDTO = null;
                 }
 
-               // $this->validarAcessoAutorizado(explode(',',str_replace(' ','',$objServicoDTO->getStrServidor())));
+                // $this->validarAcessoAutorizado(explode(',',str_replace(' ','',$objServicoDTO->getStrServidor())));
 
                 SessaoSEI::getInstance()->simularLogin(null, null, $objServicoDTO->getNumIdUsuario(), $objUnidadeDTO->getNumIdUnidade());
 
@@ -584,25 +574,26 @@ class MdCguEouvAgendamentoRN extends InfraRN
 
             $retornoWs = $this->executarServicoConsultaManifestacoes($urlWebServiceEOuv, $token, $ultimaDataExecucao, $dataAtual, null, $idRelatorioImportacao);
 
-            //Caso tenha dado erro de Token
-            if (is_string($retornoWs) && strpos($retornoWs, 'Invalidado') !== false){
-                //Tenta gerar novo token
-                $tokenValido = $this->apiValidarToken($urlWebServiceEOuv, $usuarioWebService, $senhaUsuarioWebService, $client_id, $client_secret);
+            //Caso retornado algum erro
+            if (is_string($retornoWs)) {
 
-                if(isset($tokenValido['error'])) {
-                    $textoMensagemErroToken = 'Não foi possível validar o Token de acesso aos WebServices do E-ouv. <br>Verifique as informações de Usuário, Senha, Client_Id e Client_Secret nas configurações de Parâmetros do Módulo';
+                if (strpos($retornoWs, 'Invalidado') !== false) {
+                    //Tenta gerar novo token
+                    $tokenValido = $this->apiValidarToken($urlWebServiceEOuv, $usuarioWebService, $senhaUsuarioWebService, $client_id, $client_secret);
 
-                }
-                elseif(isset($tokenValido['access_token'])){
-                    $this->gravarParametroToken($tokenValido['access_token']);
-                    $token = $tokenValido['access_token'];
+                    if (isset($tokenValido['error'])) {
+                        $textoMensagemErroToken = 'Não foi possível validar o Token de acesso aos WebServices do E-ouv. <br>Verifique as informações de Usuário, Senha, Client_Id e Client_Secret nas configurações de Parâmetros do Módulo';
 
-                    //Chama novamente a execução da ConsultaManifestacao que deu errado por causa do Token
-                    $retornoWs = $this->executarServicoConsultaManifestacoes($urlWebServiceEOuv, $token, $ultimaDataExecucao, $dataAtual, null, $idRelatorioImportacao);
+                    } elseif (isset($tokenValido['access_token'])) {
+                        $this->gravarParametroToken($tokenValido['access_token']);
+                        $token = $tokenValido['access_token'];
+
+                        //Chama novamente a execução da ConsultaManifestacao que deu errado por causa do Token
+                        $retornoWs = $this->executarServicoConsultaManifestacoes($urlWebServiceEOuv, $token, $ultimaDataExecucao, $dataAtual, null, $idRelatorioImportacao);
+                    }
                 }
 
             }
-
 
             if ($textoMensagemErroToken == '') {
                 $arrComErro = $this->obterManifestacoesComErro($urlWebServiceEOuv, $token, $ultimaDataExecucao, $dataAtual, $idRelatorioImportacao);
@@ -940,10 +931,10 @@ class MdCguEouvAgendamentoRN extends InfraRN
         //2. Dados do Solicitante
         //***********************************************************************************************
 
-            $pdf->Ln(20);
-            $pdf->SetFont('arial', 'B', 14);
-            $pdf->Cell(70, 20, "2. Dados do Solicitante:", 0, 0, 'L');
-            $pdf->Ln(20);
+        $pdf->Ln(20);
+        $pdf->SetFont('arial', 'B', 14);
+        $pdf->Cell(70, 20, "2. Dados do Solicitante:", 0, 0, 'L');
+        $pdf->Ln(20);
 
         if ($importar_dados_manifestante) {
             //Nome do Solicitante
