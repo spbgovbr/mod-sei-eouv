@@ -194,14 +194,15 @@ class MdCguEouvAgendamentoRN extends InfraRN
         //Faz tratamento diferenciado para consulta por Protocolo específico
         else{
 
-            if (strpos($retornoWs, 'Erro') !== false) {
-                if(strpos($retornoWs, '404') !== false){
-                    $this->gravarLogLinha($this->formatarProcesso($numprotocolo), $numIdRelatorio, "Usuário não possui permissão de acesso neste protocolo.", 'N');
-                    $retornoWs = null;
-                }
-                else{
-                    $this->gravarLogLinha($this->formatarProcesso($numprotocolo), $numIdRelatorio, "Erro desconhecido" . $retornoWs, 'N');
-                    throw new Exception($retornoWs);
+            if(is_string($retornoWs)) {
+                if (strpos($retornoWs, 'Erro') !== false) {
+                    if (strpos($retornoWs, '404') !== false) {
+                        $this->gravarLogLinha($this->formatarProcesso($numprotocolo), $numIdRelatorio, "Usuário não possui permissão de acesso neste protocolo.", 'N');
+                        $retornoWs = null;
+                    } else {
+                        $this->gravarLogLinha($this->formatarProcesso($numprotocolo), $numIdRelatorio, "Erro desconhecido" . $retornoWs, 'N');
+                        throw new Exception($retornoWs);
+                    }
                 }
             }
         }
@@ -749,13 +750,23 @@ class MdCguEouvAgendamentoRN extends InfraRN
             $objProcedimentoAPI = new ProcedimentoAPI();
             $objProcedimentoAPI->setIdTipoProcedimento($objTipoProcedimentoDTO->getNumIdTipoProcedimento());
 
-            $varEspecificacaoAssunto = $arrDetalheManifestacao['Assunto'] . " - " . $arrDetalheManifestacao['SubAssunto'];
+            $varEspecificacaoAssunto = "";
 
+            if(is_array($arrDetalheManifestacao['Assunto'])) {
+                $varEspecificacaoAssunto = $arrDetalheManifestacao['Assunto']['DescAssunto'];
+            }
+            if(is_array($arrDetalheManifestacao['SubAssunto'])) {
+                $varEspecificacaoAssunto = $varEspecificacaoAssunto . " / " . $arrDetalheManifestacao['SubAssunto']['DescSubAssunto'];
+            }
 
             $objProcedimentoAPI->setEspecificacao($varEspecificacaoAssunto);
             $objProcedimentoAPI->setIdUnidadeGeradora($idUnidadeOuvidoria);
             $objProcedimentoAPI->setNumeroProtocolo($numProtocoloFormatado);
             $objProcedimentoAPI->setDataAutuacao($arrDetalheManifestacao['DataCadastro']);
+            $objProcedimentoAPI->setNivelAcesso($objTipoProcedimentoDTO->getStrStaNivelAcessoSugestao());
+            $objProcedimentoAPI->setGrauSigilo($objTipoProcedimentoDTO->getStrStaGrauSigiloSugestao());
+            $objProcedimentoAPI->setIdHipoteseLegal($objTipoProcedimentoDTO->getNumIdHipoteseLegalSugestao());
+            $objProcedimentoAPI->setObservacao("Processo Gerado Automaticamente pela Integração SEI x E-ouv");
             $objEntradaGerarProcedimentoAPI = new EntradaGerarProcedimentoAPI();
             $objEntradaGerarProcedimentoAPI->setProcedimento($objProcedimentoAPI);
 
@@ -816,38 +827,70 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $urlEouvDetalhesManifestacao = $retornoWsLinha['Links'][0]['href'];
         $nup = $retornoWsLinha['NumerosProtocolo'][0];
         $dt_cadastro = $retornoWsLinha['DataCadastro'];
-        $desc_assunto = $retornoWsLinha['DescAssunto'];
-        $desc_sub_assunto = $retornoWsLinha['DescSubAssunto'];
+
+        if(is_array($retornoWsLinha['Assunto'])) {
+            $desc_assunto = $retornoWsLinha['Assunto']['DescAssunto'];
+        }
+
+        if ( is_array($retornoWsLinha['SubAssunto']) && isset($retornoWsLinha['SubAssunto']['DescSubAssunto'])){
+            $desc_sub_assunto = $retornoWsLinha['SubAssunto']['DescSubAssunto'];
+        }
+
         $id_tipo_manifestacao = $retornoWsLinha['TipoManifestacao']['IdTipoManifestacao'];
         $desc_tipo_manifestacao = $retornoWsLinha['TipoManifestacao']['DescTipoManifestacao'];
         $envolve_das4_superior = $retornoWsLinha['InformacoesAdicionais']['EnvolveCargoComissionadoDAS4OuSuperior'];
         $dt_prazo_atendimento = $retornoWsLinha['PrazoAtendimento'];
         $nome_orgao = $retornoWsLinha['OuvidoriaDestino']['NomeOuvidoria'];
 
+        if(is_array($retornoWsLinha['CanalEntrada'])) {
+            $canal_entrada = $retornoWsLinha['CanalEntrada']['IdCanalEntrada'] . " - " . $retornoWsLinha['CanalEntrada']['DescCanalEntrada'];
+        }
+
+        $registrado_por = $retornoWsLinha['RegistradoPor'];
+
         //print_r($retornoWsLinha['SolicitanteManifestacaoOuvidoria']);
         //exit();
 
-        $nome = $retornoWsLinha['Manifestante']['Nome'];
-        $desc_faixa_etaria = $retornoWsLinha['Manifestante']['FaixaEtaria'];
-        $desc_raca_cor = $retornoWsLinha['Manifestante']['corRaça'];
-        $sexo = $retornoWsLinha['Manifestante']['genero'];
-        $desc_documento_identificacao = $retornoWsLinha['Manifestante']['TipoDocumentoIdentificacao'];
-        $numero_documento_identificacao = $retornoWsLinha['Manifestante']['NumeroDocumentoIdentificacao'];
-        $endereco = $retornoWsLinha['Manifestante']['Endereco']['Logradouro'] . " " . $retornoWsLinha['Manifestante']['Endereco']['Complemento'];
-        $bairro = $retornoWsLinha['Manifestante']['Endereco']['Bairro'];
-        $desc_municipio = $retornoWsLinha['Manifestante']['Endereco']['Municipio'];
-        $cep = $retornoWsLinha['Manifestante']['Endereco']['Cep'];
-        $telefone = $retornoWsLinha['Manifestante']['Telefone'];
-        $email = $retornoWsLinha['Manifestante']['Email'];
+        if (is_array($retornoWsLinha['Manifestante'])) {
 
-        $idTipoIdentificacaoManifestante = $retornoWsLinha['Manifestante']['TipoIdentificacaoManifestante']['IdTTipoIdentificacaoManifestanteDTO'];
-        $descTipoIdentificacaoManifestante = $retornoWsLinha['Manifestante']['TipoIdentificacaoManifestante']['DescTTipoIdentificacaoManifestanteDTO'];
+            $nome = $retornoWsLinha['Manifestante']['Nome'];
+            $desc_faixa_etaria = $retornoWsLinha['Manifestante']['FaixaEtaria'];
+            $desc_raca_cor = $retornoWsLinha['Manifestante']['corRaça'];
+            $sexo = $retornoWsLinha['Manifestante']['genero'];
+            $desc_documento_identificacao = $retornoWsLinha['Manifestante']['TipoDocumentoIdentificacao'];
+            $numero_documento_identificacao = $retornoWsLinha['Manifestante']['NumeroDocumentoIdentificacao'];
+            $endereco = $retornoWsLinha['Manifestante']['Endereco']['Logradouro'] . " " . $retornoWsLinha['Manifestante']['Endereco']['Complemento'];
+            $bairro = $retornoWsLinha['Manifestante']['Endereco']['Bairro'];
 
-        $desc_municipio_fato = $retornoWsLinha['LocalFato']['Municipio'];
-        $descricao_fato = $retornoWsLinha['LocalFato']['DescricaoLocalFato'];
+            if (is_array($retornoWsLinha['Manifestante']['Endereco']['Municipio'])) {
+                $desc_municipio = $retornoWsLinha['Manifestante']['Endereco']['Municipio']['DescMunicipio'] . " / " . $retornoWsLinha['Manifestante']['Endereco']['Municipio']['Uf']['SigUf'] . " - " . $retornoWsLinha['Manifestante']['Endereco']['Municipio']['Uf']['DescUf'];
+            }
+
+            $cep = $retornoWsLinha['Manifestante']['Endereco']['Cep'];
+
+            if(is_array($retornoWsLinha['Manifestante']['Telefone'])) {
+                $telefone = "(" . $retornoWsLinha['Manifestante']['Telefone']['ddd'] . ") " . $retornoWsLinha['Manifestante']['Telefone']['Numero'];
+            }
+
+            $email = $retornoWsLinha['Manifestante']['Email'];
+
+            $idTipoIdentificacaoManifestante = $retornoWsLinha['Manifestante']['TipoIdentificacaoManifestante']['IdTTipoIdentificacaoManifestanteDTO'];
+            $descTipoIdentificacaoManifestante = $retornoWsLinha['Manifestante']['TipoIdentificacaoManifestante']['DescTTipoIdentificacaoManifestanteDTO'];
+        }
+
+        if(is_array($retornoWsLinha['Teor']['LocalFato'])) {
+            if(is_array($retornoWsLinha['Teor']['LocalFato']['Municipio'])) {
+                $desc_municipio_fato = $retornoWsLinha['Teor']['LocalFato']['Municipio']['DescMunicipio'] . " / " . $retornoWsLinha['Teor']['LocalFato']['Municipio']['Uf']['SigUf'] . " - " . $retornoWsLinha['Teor']['LocalFato']['Municipio']['Uf']['DescUf'];
+            }
+
+            $descricao_local_fato = $retornoWsLinha['Teor']['LocalFato']['DescricaoLocalFato'];
+        }
+
+        $descricao_fato = $retornoWsLinha['Teor']['DescricaoAtosOuFatos'];
+
 
         $envolvidos = array();
-        if (isset($retornoWsLinha['EnvolvidosManifestacao'])) {
+        if (is_array($retornoWsLinha['Teor']['EnvolvidosManifestacao']) && isset($retornoWsLinha['Teor']['EnvolvidosManifestacao'])) {
             $iEnvolvido = 0;
             foreach ($this->verificaRetornoWS($retornoWsLinha['EnvolvidosManifestacao']) as $envolvidosFatoManifestacao) {
                 $envolvidos[$iEnvolvido][0] = $envolvidosFatoManifestacao['EnvolvidosManifestacao']['IdFuncaoEnvolvidoManifestacao'] . " - " . $envolvidosFatoManifestacao['EnvolvidosManifestacao']['Funcao'];
@@ -859,7 +902,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
 
         $campos_adicionais = array();
 
-        if (isset($retornoWsLinha['CamposAdicionaisManifestacao'])) {
+        if (is_array($retornoWsLinha['Teor']['CamposAdicionaisManifestacao']) && isset($retornoWsLinha['Teor']['CamposAdicionaisManifestacao'])) {
             $iCamposAdicionais = 0;
             foreach ($this->verificaRetornoWS($retornoWsLinha['CamposAdicionaisManifestacao']) as $camposAdicionais) {
                 $campos_adicionais[$iCamposAdicionais][0] = $camposAdicionais['NomeExibido'];
@@ -927,6 +970,17 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $pdf->setFont('arial', '', 12);
         $pdf->Cell(70, 20, $nome_orgao, 0, 1, 'L');
 
+        //Canal Entrada
+        $pdf->SetFont('arial', 'B', 12);
+        $pdf->Cell(150, 20, "Canal de Entrada:", 0, 0, 'L');
+        $pdf->setFont('arial', '', 12);
+        $pdf->Cell(70, 20, $canal_entrada, 0, 1, 'L');
+
+        //Registrado Por
+        $pdf->SetFont('arial', 'B', 12);
+        $pdf->Cell(150, 20, "Registrado Por:", 0, 0, 'L');
+        $pdf->setFont('arial', '', 12);
+        $pdf->Cell(70, 20, $registrado_por, 0, 1, 'L');
         //***********************************************************************************************
         //2. Dados do Solicitante
         //***********************************************************************************************
@@ -1003,6 +1057,7 @@ class MdCguEouvAgendamentoRN extends InfraRN
             $pdf->SetFont('arial', 'B', 12);
             $pdf->Cell(150, 20, "Não importado do E-Ouv devido a configuração no módulo.", 0, 0, 'L');
         }
+        $pdf->Ln(20);
 
         //***********************************************************************************************
         //3. Dados do Fato da Manifestação
@@ -1017,6 +1072,12 @@ class MdCguEouvAgendamentoRN extends InfraRN
         $pdf->Cell(115, 20, "Município/UF:", 0, 0, 'L');
         $pdf->setFont('arial', '', 12);
         $pdf->Cell(70, 20, $desc_municipio_fato, 0, 1, 'L');
+
+        //Descricao Local
+        $pdf->SetFont('arial', 'B', 12);
+        $pdf->Cell(115, 20, "Local:", 0, 0, 'L');
+        $pdf->setFont('arial', '', 12);
+        $pdf->Cell(70, 20, $descricao_local_fato, 0, 1, 'L');
 
         //Descrição
         $pdf->SetFont('arial', 'B', 12);
