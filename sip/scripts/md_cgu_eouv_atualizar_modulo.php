@@ -11,13 +11,13 @@ require_once dirname(__FILE__).'/../web/Sip.php';
 class MdCguEouvAtualizadorSipRN extends InfraRN{
 
     private $numSeg = 0;
-    private $versaoAtualDesteModulo = '2.0.5';
+    private $versaoAtualDesteModulo = '3.0.0';
     private $nomeDesteModulo = 'EOUV - Integração com sistema E-ouv';
-    private $historicoVersoes = array('1.0.0');
     private $prefixoParametro = 'MD_CGU_EOUV';
-    private $nomeParametroModulo = 'VERSAO_MODULO_CGU_EOUV';
-    private $numIdOrgao = 0;
-    private $numHierarquia = 100000018;
+    private $nomeParametroVersaoModulo = 'VERSAO_MODULO_CGU_EOUV';
+    private $historicoVersoes = array('2.0.5', '3.0.0');
+    //Começamos a contralar a partir da versão 2.0.5 que é a última estável para o SEI 3.0
+    //A versão 3.0.0 começa a utilizar a versão REST dos webservices do E-Ouv
 
     public function __construct(){
         parent::__construct();
@@ -99,13 +99,19 @@ class MdCguEouvAtualizadorSipRN extends InfraRN{
 
             $objInfraParametro = new InfraParametro(BancoSip::getInstance());
 
-            $strVersaoModuloPeticionamento = $objInfraParametro->getValor($this->nomeParametroModulo, false);
+            $strVersaoModuloEOuv = $objInfraParametro->getValor($this->nomeParametroVersaoModulo, false);
 
             //VERIFICANDO QUAL VERSAO DEVE SER INSTALADA NESTA EXECUCAO
             //se nao tem nenhuma versao instalada, instalar todas
-            if (InfraString::isBolVazia($strVersaoModuloPeticionamento)){
-                $this->instalarv100();
-                $this->logar('ATUALIZAÇÔES DA VERSÃO '. $this->versaoAtualDesteModulo .' DO MODULO '. $this->nomeDesteModulo .' INSTALADAS COM SUCESSO NA BASE DO SIP');
+            if (InfraString::isBolVazia($strVersaoModuloEOuv)){
+                $this->instalarv205();
+                $this->instalarv300();
+                $this->logar('INSTALAÇÃO/ATUALIZAÇÃO DA VERSÃO '. $this->versaoAtualDesteModulo .' DO MODULO '. $this->nomeDesteModulo .' INSTALADAS COM SUCESSO NA BASE DO SIP');
+                $this->finalizar('FIM', false);
+            }
+            elseif ($strVersaoModuloEOuv == '2.0.5') {
+                $this->instalarv300();
+                $this->logar('INSTALAÇÃO/ATUALIZAÇÃO DA VERSÃO ' . $this->versaoAtualDesteModulo . ' DO MODULO ' . $this->nomeDesteModulo . ' INSTALADAS COM SUCESSO NA BASE DO SEI');
                 $this->finalizar('FIM', false);
             }
 
@@ -122,7 +128,9 @@ class MdCguEouvAtualizadorSipRN extends InfraRN{
 
     }
 
-    protected function instalarv100(){
+    protected function instalarv205(){
+
+        $this->logar('EXECUTANDO A INSTALAÇÃO/ATUALIZAÇÃO DA VERSÃO 2.0.5 DO '.$this->nomeDesteModulo.' NA BASE DO SIP');
 
         $objSistemaRN = new SistemaRN();
         $objPerfilRN = new PerfilRN();
@@ -161,6 +169,9 @@ class MdCguEouvAtualizadorSipRN extends InfraRN{
         $this->adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador,
             'md_cgu_eouv_depara_importacao_consultar', 'Consulta a tabela DePara referente a importação de Tipo de manifestação',
             'controlador.php?acao=md_cgu_eouv_depara_importacao_consultar');
+        $this->adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador,
+            'md_cgu_eouv_depara_importacao_excluir', 'Excluir item da tabela DePara referente a importação de Tipo de manifestação',
+            'controlador.php?acao=md_cgu_eouv_depara_importacao_excluir');
         $numIdRecursoIntegracaoSei = $this->adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador,
             'md_cgu_eouv_integracao_sei', 'Integração entre E-ouv e SEI',
             'controlador.php?acao=md_cgu_eouv_integracao_sei');
@@ -170,9 +181,6 @@ class MdCguEouvAtualizadorSipRN extends InfraRN{
         $this->adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador,
             'md_cgu_eouv_relatorio_importacao_detalhar', 'Relatório Detalhado de importação de manifestações do EOUV',
             'controlador.php?acao=md_cgu_eouv_relatorio_importacao_detalhar');
-		$this->adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador,
-            'md_cgu_eouv_relatorio_importacao_excluir', 'Excluir Item no Relatório Detalhado de importação de manifestações do EOUV',
-            'controlador.php?acao=md_cgu_eouv_relatorio_importacao_excluir');
         $numIdRecursoRelatorioImportacaoEouvSei = $this->adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador,
             'md_cgu_eouv_relatorio_importacao_listar', 'Relatório de importação de manifestações do EOUV',
             'controlador.php?acao=md_cgu_eouv_relatorio_importacao_listar');
@@ -189,12 +197,104 @@ class MdCguEouvAtualizadorSipRN extends InfraRN{
         $numIdMenuSei = $objMenuDTO->getNumIdMenu();
 
         $menuEouv = $this->adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador,
-            $numIdMenuSei, null, null, 'E-Ouv',
+            $numIdMenuSei, null, $numIdRecursoIntegracaoSei, 'E-Ouv',
             'Integração entre E-ouv e SEI', 1100);
 
         $this->adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador,
             $numIdMenuSei, $menuEouv->getNumIdItemMenu(),
             $numIdRecursoRelatorioImportacaoEouvSei, 'Importação de Manifestação', 'Relatório de Importação de Manifestação', 10);
+
+        $this->logar('ADICIONANDO PARÂMETRO '.$this->nomeParametroVersaoModulo.' NA TABELA infra_parametro PARA CONTROLAR A VERSÃO DO MÓDULO');
+        BancoSip::getInstance()->executarSql('INSERT INTO infra_parametro (valor, nome ) VALUES( \'2.0.5\',  \''. $this->nomeParametroVersaoModulo .'\' )');
+
+    }
+
+
+    protected function instalarv300()
+    {
+
+        $this->logar('EXECUTANDO A INSTALAÇÃO/ATUALIZAÇÃO DA VERSÃO 3.0.0 DO ' . $this->nomeDesteModulo . ' NA BASE DO SIP');
+
+        $objSistemaRN = new SistemaRN();
+        $objPerfilRN = new PerfilRN();
+        $objMenuRN = new MenuRN();
+        $objItemMenuRN = new ItemMenuRN();
+        $objRecursoRN = new RecursoRN();
+
+        $objSistemaDTO = new SistemaDTO();
+        $objSistemaDTO->retNumIdSistema();
+        $objSistemaDTO->setStrSigla('SEI');
+
+        $objSistemaDTO = $objSistemaRN->consultar($objSistemaDTO);
+
+        if ($objSistemaDTO == null) {
+            throw new InfraException('Sistema SEI não encontrado.');
+        }
+
+        $numIdSistemaSei = $objSistemaDTO->getNumIdSistema();
+
+        $objPerfilDTO = new PerfilDTO();
+        $objPerfilDTO->retNumIdPerfil();
+        $objPerfilDTO->setNumIdSistema($numIdSistemaSei);
+        $objPerfilDTO->setStrNome('Administrador');
+        $objPerfilDTO = $objPerfilRN->consultar($objPerfilDTO);
+
+        if ($objPerfilDTO == null) {
+            throw new InfraException('Perfil Administrador do sistema SEI não encontrado.');
+        }
+
+        $objMenuDTO = new MenuDTO();
+        $objMenuDTO->retNumIdMenu();
+        $objMenuDTO->setNumIdSistema($numIdSistemaSei);
+        $objMenuDTO->setStrNome('Principal');
+        $objMenuDTO = $objMenuRN->consultar($objMenuDTO);
+
+        if ($objMenuDTO == null){
+            throw new InfraException('Menu do sistema SEI não encontrado.');
+        }
+        $numIdMenuSei = $objMenuDTO->getNumIdMenu();
+
+        $numIdPerfilSeiAdministrador = $objPerfilDTO->getNumIdPerfil();
+
+        $this->adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador,
+            'md_cgu_eouv_parametro', 'Controle de Parâmetros módulo SEI x E-ouv',
+            'controlador.php?acao=md_cgu_eouv_parametro');
+
+        $this->adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador,
+            'md_cgu_eouv_parametro_consultar', 'Consulta de Parâmetros módulo SEI x E-ouv',
+            'controlador.php?acao=md_cgu_eouv_parametro_consultar');
+
+        $numIdRecursoParametro = $this->adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador,
+            'md_cgu_eouv_parametro_listar', 'Lista de Parâmetros módulo SEI x E-ouv',
+            'controlador.php?acao=md_cgu_eouv_parametro_listar');
+
+        $this->adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador,
+            'md_cgu_eouv_parametro_cadastrar', 'Cadastro de Parâmetros módulo SEI x E-ouv',
+            'controlador.php?acao=md_cgu_eouv_parametro_cadastrar');
+
+        $this->adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador,
+            'md_cgu_eouv_parametro_alterar', 'Alteração de Parâmetros módulo SEI x E-ouv',
+            'controlador.php?acao=md_cgu_eouv_parametro_alterar');
+
+
+        $this->logar('RECUPERANDO MENU DO E-OUV');
+        $objItemMenuDTOEouv = new ItemMenuDTO();
+        $objItemMenuDTOEouv->retNumIdItemMenu();
+        $objItemMenuDTOEouv->setNumIdSistema($numIdSistemaSei);
+        $objItemMenuDTOEouv->setStrRotulo('E-Ouv');
+        $objItemMenuDTOEouv = $objItemMenuRN->consultar( $objItemMenuDTOEouv );
+
+
+        $this->logar('CRIANDO e VINCULANDO ITEM MENU A PERFIL - E-Ouv->Parâmetros');
+
+        $this->adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador,
+            $numIdMenuSei, $objItemMenuDTOEouv->getNumIdItemMenu(),
+            $numIdRecursoParametro, 'Parâmetros do Módulo E-ouv', 'Parâmetros', 20);
+
+
+        $this->logar('ATUALIZANDO PARÂMETRO '.$this->nomeParametroVersaoModulo.' NA TABELA infra_parametro PARA CONTROLAR A VERSÃO DO MÓDULO');
+        BancoSip::getInstance()->executarSql('UPDATE infra_parametro SET valor = \'3.0.0\' WHERE nome = \''. $this->nomeParametroVersaoModulo .'\' ' );
+
     }
 
     private function adicionarItemMenu($numIdSistema, $numIdPerfil, $numIdMenu, $numIdItemMenuPai, $numIdRecurso, $strRotulo, $strDescricao, $numSequencia ){

@@ -11,8 +11,11 @@
  *ao SeiWS para estar disponível como um método homologado pelo SEI.
  */
 
+
+
 require_once dirname(__FILE__) . '/../../../../SEI.php';
 
+error_reporting(E_ALL); ini_set('display_errors', '1');
 
 class MdCguEouvWS extends InfraWS {
 
@@ -51,6 +54,34 @@ class MdCguEouvWS extends InfraWS {
                 SessaoSEI::getInstance()->simularLogin(null, null, $objServicoDTO->getNumIdUsuario(), $objUnidadeDTO->getNumIdUnidade());
             }
 
+            /*define('OAUTH2_CLIENT_ID', '15');
+            define('OAUTH2_CLIENT_SECRET', 'rwkp6899');
+
+
+            $apiURLBase = 'https://treinamentoouvidorias.cgu.gov.br/';
+            $tokenURL = 'https://treinamentoouvidorias.cgu.gov.br/oauth/token';
+
+            //$result = file_get_contents('https://treinamentoouvidorias.cgu.gov.br/oauth/token/?client_id=15&');
+
+            // Exchange the auth code for a token
+            $token = $this->apiRequest($tokenURL, FALSE, array(
+                'client_id' => OAUTH2_CLIENT_ID,
+                'client_secret' => OAUTH2_CLIENT_SECRET,
+                'grant_type' => 'password',
+                'username' => 'wsIntegracaoSEI',
+                'password' => 'teste123'
+            ));
+
+
+            $token = json_decode($token, true);
+
+            //echo $token['access_token'];
+            //$_SESSION['access_token'] = $token->access_token;
+
+
+            $this->apiRequestManifestacao($token['access_token']);
+            */
+
             $objEOuvAgendamentoRn = new MdCguEouvAgendamentoRN();
             $objEOuvAgendamentoRn -> executarImportacaoManifestacaoEOuv();
 
@@ -58,6 +89,76 @@ class MdCguEouvWS extends InfraWS {
         }catch(Exception $e){
             $this->processarExcecao($e);
         }
+    }
+
+    function  apiRequest($url, $params)
+    {
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => "https://treinamentoouvidorias.cgu.gov.br/oauth/token",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+            CURLOPT_POSTFIELDS => "client_id=15&client_secret=rwkp6899&grant_type=password&username=wsIntegracaoSEI&password=teste123&undefined=",
+            CURLOPT_HTTPHEADER => array(
+                "Content-Type: application/x-www-form-urlencoded",
+                "Postman-Token: fbbee7e4-1efd-47be-b64a-ed2ee2dd4f1b",
+                "cache-control: no-cache"
+            ),
+        ));
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+
+        curl_close($curl);
+
+        if ($err) {
+            return "cURL Error #:" . $err;
+        } else {
+            return $response;
+        }
+
+    }
+
+    function apiRequestManifestacao($token){
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => "https://treinamentoouvidorias.cgu.gov.br/api/manifestacoes?dataCadastroInicio=31/01/2019%2000:00:00&dataCadastroFim=04/02/2019%2023:59:59",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+            CURLOPT_POSTFIELDS => "undefined=",
+            CURLOPT_HTTPHEADER => array(
+                "Authorization: Bearer ZwchJxN61InSdNMS1mpN82lvvLCx8i1f24Wkve6wRjk_aHkEHlF3yaVljtndWtEzN2TfhGmhfZxcLMt0PBoksJPve1zcfj5JVW4l-j0C5P_6fclZEVVNZ-pYR_faU1QQBDD23vJnLhIyXZdc11mhS_gcu9SN1fWTWc3S_QD7nPPlhX14aHm4HOPrRcIHp5MO9fc0gLb-y0aOjZ9sNTC6hIFNnWX5HWzK1ZSj3eo0cquweAOC8wmqDXmXy4DWrAWBRvu3mYpF-BNJZXim31E8emjENMcXot6hAuTI-4TdxFSdQZsnn1KgoAmMQUDwRC8jwAeGZU6JXxBPWyUv06kFRv5udw1PeMclLFSF61DvU4FwIQmaRrACkc4a7hZtDlNfSVZ9E1KgQsaf0gHVD-WFOqbT8bMOLfHNSSkZ8lzI18QvpRBufjwhYBu_g4SwqCF6ZNjR_g",
+                "Postman-Token: 0744fa6c-14d5-4da7-9c2d-59c5a63dd47b",
+                "cache-control: no-cache"
+            ),
+        ));
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+
+        curl_close($curl);
+
+        if ($err) {
+            echo "cURL Error #:" . $err;
+        } else {
+            $response = utf8_decode($response);
+            echo $response;
+        }
+
+        exit();
+
     }
 
     public function testarGerarPDF($SiglaSistema, $IdentificacaoServico, $IdUnidade)

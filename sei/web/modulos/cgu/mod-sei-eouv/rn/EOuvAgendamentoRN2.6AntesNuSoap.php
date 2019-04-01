@@ -280,7 +280,7 @@ class EOuvAgendamentoRN extends InfraRN
         echo "ultimaExecucao" . $ultimaDataExecucaoFormatoEouv . "<br>";
         echo "dataAtual" . $dataAtualFormatoEOuv;
 
-        exit();
+
 
         $retornoWs = $objWS->GetListaManifestacaoOuvidoria(array("login" => $usuarioWebService,
             "senha" => $senhaUsuarioWebService, "numProtocolo" => '', "dataCadastroInicio" => $ultimaDataExecucaoFormatoEouv, "dataCadastroFim" => $dataAtualFormatoEOuv, "dataPrazoRespostaInicio" => '', "dataPrazoRespostaFim" => '', "situacaoManifestacao" => 1))->GetListaManifestacaoOuvidoriaResult;
