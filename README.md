@@ -1,4 +1,10 @@
 
+## Este reposiório foi arquivado!
+
+# Favor acessar https://github.com/cgugovbr/mod-sei-eouv
+
+-----
+
 # Módulo de Integração SEI & FalaBR (e-Ouv)
 
 ## Requisitos
